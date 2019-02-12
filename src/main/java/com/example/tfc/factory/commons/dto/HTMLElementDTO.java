@@ -10,12 +10,15 @@ import java.util.List;
 public class HTMLElementDTO {
 
     private HTMLElementType type;
-    private List<String> attributes = new ArrayList<>();
-    private String content;
-    private List<HTMLElementDTO> elements = new ArrayList<>();
+    private List<HTMLElementAttributeDTO> attributes = new ArrayList<>();
+    private String text;
+    private List<HTMLElementDTO> children = new ArrayList<>();
 
     public HTMLElementDTO addAttribute(String name, String value) {
-         this.attributes.add(name + "=\"" + value + "\"");
-         return this;
+
+        if (value != null) {
+            this.attributes.add(new HTMLElementAttributeDTO(name, value));
+        }
+        return this;
     }
 }

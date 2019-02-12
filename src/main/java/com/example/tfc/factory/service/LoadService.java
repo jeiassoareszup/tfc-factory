@@ -1,8 +1,13 @@
 package com.example.tfc.factory.service;
 
+import com.example.tfc.factory.commons.Constants;
 import com.example.tfc.factory.commons.dto.PanelDTO;
 import com.example.tfc.factory.resolver.component.ComponentResolverManager;
 import com.example.tfc.factory.utils.ReflectionUtils;
+import com.example.tfc.factory.writer.HTMLWriter;
+import com.example.tfc.factory.writer.Writer;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Service;
 import org.springframework.util.CollectionUtils;
 
@@ -14,7 +19,14 @@ import java.util.List;
 @Service
 public class LoadService {
 
-    private static final String EXTERNAL_JARS_FOLDER_PATH = "/Users/jeiassoares/class/";
+    private HTMLWriter htmlWriter;
+    private Writer projectWriter;
+
+    @Autowired
+    public LoadService(@Qualifier("htmlWriter") HTMLWriter htmlWriter, @Qualifier("projectWriter") Writer projectWriter) {
+        this.htmlWriter = htmlWriter;
+        this.projectWriter = projectWriter;
+    }
 
     public void load() {
 
@@ -22,7 +34,7 @@ public class LoadService {
 
         try (JarFileLoader loader = new JarFileLoader(urls)) {
 
-            loader.addFile(EXTERNAL_JARS_FOLDER_PATH + "test.jar");
+            loader.addFile(Constants.EXTERNAL_JARS_FOLDER_PATH + "test.jar");
             Class<?> aClass = loader.loadClass("com.ibm.bsch.client.bmlclasses.BRVR085");
 
             Object instance = aClass.newInstance();
@@ -46,7 +58,9 @@ public class LoadService {
         getters.remove(componentsMethod);
         buildComponents((List) componentsMethod.invoke(panel), 0, panelDTO);
 
-        System.out.println(panelDTO);
+        projectWriter.write(panelDTO);
+        htmlWriter.write(panelDTO);
+
     }
 
     private void buildComponents(List components, int i, PanelDTO panelDTO) {

@@ -11,13 +11,12 @@ public class BSCHButtonComponentResolver extends ComponentResolver {
     public PanelDTO resolve(Object component, PanelDTO panelDTO) {
 
         HTMLElementDTO htmlElementDTO = new HTMLElementDTO();
-
         htmlElementDTO.setType(HTMLElementType.BUTTON);
+        htmlElementDTO.setText(ReflectionUtils.getFieldValue(component, "getText"));
 
         panelDTO.getHtml().getElements().add(
                 htmlElementDTO
                         .addAttribute("name", ReflectionUtils.getFieldValue(component, "getName"))
-                        .addAttribute("text", ReflectionUtils.getFieldValue(component, "getText"))
         );
 
         return panelDTO;

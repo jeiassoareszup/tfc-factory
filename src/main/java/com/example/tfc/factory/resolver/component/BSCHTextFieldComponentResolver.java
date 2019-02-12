@@ -12,11 +12,11 @@ public class BSCHTextFieldComponentResolver extends ComponentResolver {
 
         HTMLElementDTO htmlElementDTO = new HTMLElementDTO();
         htmlElementDTO.setType(HTMLElementType.INPUT);
+        htmlElementDTO.setText(ReflectionUtils.getFieldValue(component, "getText"));
 
         panelDTO.getHtml().getElements().add(
                 htmlElementDTO
                         .addAttribute("name", ReflectionUtils.getFieldValue(component, "getName"))
-                        .addAttribute("text", ReflectionUtils.getFieldValue(component, "getText"))
                         .addAttribute("[(ngModel)]", ReflectionUtils.getFieldValue(component, "getDataName"))
                         .addAttribute("maxlength", ReflectionUtils.getFieldValue(component, "getMaxChars"))
         );

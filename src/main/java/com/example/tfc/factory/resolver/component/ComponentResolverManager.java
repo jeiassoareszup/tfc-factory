@@ -10,6 +10,7 @@ public final class ComponentResolverManager {
         resolvers.put("com.ibm.dse.gui.extensions.BSCHLabel", new BSCHLabelComponentResolver());
         resolvers.put("com.ibm.dse.gui.extensions.BSCHOperationPanel", new BSCHOperationPanelComponentResolver());
         resolvers.put("com.ibm.dse.gui.extensions.BSCHTextField", new BSCHTextFieldComponentResolver());
+        resolvers.put("com.ibm.dse.gui.extensions.BSCHButton", new BSCHButtonComponentResolver());
         resolvers.put("com.ibm.dse.gui.extensions.BSCHTable", new BSCHTableComponentResolver());
         resolvers.put("NOT_FOUND", new NotFoundComponentResolver());
     }

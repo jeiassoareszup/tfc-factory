@@ -21,35 +21,27 @@ public class BSCHTableComponentResolver extends ComponentResolver {
 
         HTMLElementDTO headerRow = new HTMLElementDTO();
         headerRow.setType(HTMLElementType.TABLE_ROW);
-        table.getElements().add(headerRow);
+        table.getChildren().add(headerRow);
 
         HTMLElementDTO elementRow = new HTMLElementDTO();
         String tableSource = ReflectionUtils.getFieldValue(component, "getDataNameForTable");
         elementRow.addAttribute("*ngFor", "element of " + tableSource);
         elementRow.setType(HTMLElementType.TABLE_ROW);
-        table.getElements().add(elementRow);
+        table.getChildren().add(elementRow);
 
         columns.forEach(c -> {
 
             HTMLElementDTO header = new HTMLElementDTO();
             header.setType(HTMLElementType.TABLE_HEADER);
+            header.setText(c.toString().split(";")[0]);
 
-            HTMLElementDTO headerText = new HTMLElementDTO();
-            headerText.setType(HTMLElementType.TEXT);
-            headerText.setContent(c.toString().split(";")[0]);
-            header.getElements().add(headerText);
-
-            headerRow.getElements().add(header);
+            headerRow.getChildren().add(header);
 
             HTMLElementDTO rowData = new HTMLElementDTO();
             rowData.setType(HTMLElementType.TABLE_DATA);
+            rowData.setText("{{element." + c.toString().split(";")[2] + "}}");
 
-            HTMLElementDTO elementText = new HTMLElementDTO();
-            elementText.setType(HTMLElementType.TEXT);
-            elementText.setContent("{{element." + c.toString().split(";")[2] + "}}");
-            rowData.getElements().add(elementText);
-
-            elementRow.getElements().add(rowData);
+            elementRow.getChildren().add(rowData);
         });
 
 
