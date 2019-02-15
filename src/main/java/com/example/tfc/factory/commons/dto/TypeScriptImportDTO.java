@@ -5,8 +5,7 @@ import lombok.Getter;
 
 @Getter
 @AllArgsConstructor
-public class TypeScriptFunctionDTO {
-    private String name;
-    private String[] params;
-    private String body;
+public class TypeScriptImportDTO {
+    private String[] name;
+    private String path;
 }

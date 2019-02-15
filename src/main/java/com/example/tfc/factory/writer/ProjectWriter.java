@@ -35,11 +35,7 @@ public class ProjectWriter implements Writer {
     }
 
     private void createComponentFolder(PanelDTO panelDTO) {
-        boolean success = new File("/tmp/" + Constants.PROJECT_ROOT_FOLDER_NAME + "/src/app/components/" + panelDTO.getName()).mkdirs();
-
-        if (!success) {
-            throw new RuntimeException("error on create component folder");
-        }
+        new File(Constants.FULL_COMPONENT_FOLDER_PATH + panelDTO.getName()).mkdirs();
     }
 
     private static class StreamGobbler implements Runnable {

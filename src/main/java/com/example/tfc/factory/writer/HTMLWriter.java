@@ -31,7 +31,9 @@ public class HTMLWriter implements Writer {
             panelDTO.getHtml().getElements().forEach(e -> writeHtmlElements(e, doc.getRootElement()));
 
             XMLOutputter outputter = new XMLOutputter(Format.getPrettyFormat());
-            outputter.output(doc, new FileWriter("/tmp/" + Constants.PROJECT_ROOT_FOLDER_NAME + "/src/app/components/" + panelDTO.getName() + "/" + panelDTO.getName()+ ".html"));
+            panelDTO.getHtml().setFileName(panelDTO.getName()+ ".html");
+
+            outputter.output(doc, new FileWriter(Constants.FULL_COMPONENT_FOLDER_PATH + panelDTO.getName() + "/" + panelDTO.getHtml().getFileName()));
         } catch (Exception e) {
             e.printStackTrace();
         }

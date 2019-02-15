@@ -1,8 +1,10 @@
-package com.example.tfc.factory.resolver.component;
+package com.example.tfc.factory.resolver;
+
+import com.example.tfc.factory.resolver.component.*;
 
 import java.util.HashMap;
 
-public final class ComponentResolverManager {
+public final class ResolverManager {
 
     private static HashMap<String, ComponentResolver> resolvers = new HashMap<>();
 
@@ -12,6 +14,7 @@ public final class ComponentResolverManager {
         resolvers.put("com.ibm.dse.gui.extensions.BSCHTextField", new BSCHTextFieldComponentResolver());
         resolvers.put("com.ibm.dse.gui.extensions.BSCHButton", new BSCHButtonComponentResolver());
         resolvers.put("com.ibm.dse.gui.extensions.BSCHTable", new BSCHTableComponentResolver());
+        resolvers.put("com.ibm.dse.gui.extensions.BSCHCrossRelation", new BSCHCrossRelationComponentResolver());
         resolvers.put("NOT_FOUND", new NotFoundComponentResolver());
     }
 

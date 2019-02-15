@@ -5,8 +5,7 @@ import lombok.Getter;
 
 @Getter
 @AllArgsConstructor
-public class TypeScriptFunctionDTO {
+public class TypeScriptFieldDTO {
     private String name;
-    private String[] params;
-    private String body;
+    private String value;
 }

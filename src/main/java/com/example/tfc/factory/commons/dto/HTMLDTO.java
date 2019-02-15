@@ -7,5 +7,6 @@ import java.util.List;
 
 @Data
 public class HTMLDTO {
+    private String fileName;
     private List<HTMLElementDTO> elements = new ArrayList<>();
 }

@@ -2,9 +2,8 @@ package com.example.tfc.factory.service;
 
 import com.example.tfc.factory.commons.Constants;
 import com.example.tfc.factory.commons.dto.PanelDTO;
-import com.example.tfc.factory.resolver.component.ComponentResolverManager;
+import com.example.tfc.factory.resolver.ResolverManager;
 import com.example.tfc.factory.utils.ReflectionUtils;
-import com.example.tfc.factory.writer.HTMLWriter;
 import com.example.tfc.factory.writer.Writer;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
@@ -19,13 +18,15 @@ import java.util.List;
 @Service
 public class LoadService {
 
-    private HTMLWriter htmlWriter;
+    private Writer htmlWriter;
     private Writer projectWriter;
+    private Writer componentWriter;
 
     @Autowired
-    public LoadService(@Qualifier("htmlWriter") HTMLWriter htmlWriter, @Qualifier("projectWriter") Writer projectWriter) {
+    public LoadService(@Qualifier("htmlWriter") Writer htmlWriter, @Qualifier("projectWriter") Writer projectWriter, @Qualifier("componentWriter") Writer componentWriter) {
         this.htmlWriter = htmlWriter;
         this.projectWriter = projectWriter;
+        this.componentWriter = componentWriter;
     }
 
     public void load() {
@@ -35,7 +36,7 @@ public class LoadService {
         try (JarFileLoader loader = new JarFileLoader(urls)) {
 
             loader.addFile(Constants.EXTERNAL_JARS_FOLDER_PATH + "test.jar");
-            Class<?> aClass = loader.loadClass("com.ibm.bsch.client.bmlclasses.BRVR085");
+            Class<?> aClass = loader.loadClass("com.ibm.bsch.client.bmlclasses.BRVR086");
 
             Object instance = aClass.newInstance();
             Method exec = aClass.getMethod("exec");
@@ -53,14 +54,14 @@ public class LoadService {
 
         Method componentsMethod = getters.stream().filter(m -> "getComponents".equals(m.getName())).findFirst().orElse(null);
 
-        PanelDTO panelDTO = ComponentResolverManager.getResolver(panel.getClass().getName()).resolve(panel, PanelDTO.init());
+        PanelDTO panelDTO = ResolverManager.getResolver(panel.getClass().getName()).resolve(panel, PanelDTO.init());
 
         getters.remove(componentsMethod);
         buildComponents((List) componentsMethod.invoke(panel), 0, panelDTO);
 
         projectWriter.write(panelDTO);
         htmlWriter.write(panelDTO);
-
+        componentWriter.write(panelDTO);
     }
 
     private void buildComponents(List components, int i, PanelDTO panelDTO) {
@@ -69,7 +70,7 @@ public class LoadService {
             return;
         }
 
-        PanelDTO resolve = ComponentResolverManager.getResolver(components.get(i).getClass().getName()).resolve(components.get(i), panelDTO);
+        PanelDTO resolve = ResolverManager.getResolver(components.get(i).getClass().getName()).resolve(components.get(i), panelDTO);
         buildComponents(components, ++i, resolve);
     }
 
