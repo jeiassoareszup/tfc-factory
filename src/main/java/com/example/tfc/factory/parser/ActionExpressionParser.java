@@ -12,6 +12,7 @@ import java.util.Map;
 public class ActionExpressionParser extends ExpressionParser {
 
     private static Map<String, String> behaviorsValues = new HashMap<>();
+    private TypeScriptFieldDTO field;
 
     static {
         behaviorsValues.put("OPT", "false");
@@ -34,11 +35,13 @@ public class ActionExpressionParser extends ExpressionParser {
             } else {
                 value = getValue();
             }
-            return TypeScriptTemplateUtils.getAttribution(new TypeScriptFieldDTO(getComponentName(), value));
+            this.field = new TypeScriptFieldDTO(getComponentName(), value);
+            return TypeScriptTemplateUtils.getAttribution(this.field);
         }
 
-        String variableName = BSCHCrossRelationComponentResolver.getVariableName(getComponentName(), BSCHCrossRelationComponentResolver.getAttributeName(getAction(), getParameter())[0]);
-        return TypeScriptTemplateUtils.getAttribution(new TypeScriptFieldDTO(variableName, getValue()));
+        String variableName = BSCHCrossRelationComponentResolver.getVariableName(getComponentName(), BSCHCrossRelationComponentResolver.getAttributeName(getAction(), getParameter()));
+        this.field = new TypeScriptFieldDTO(variableName, getValue());
+        return TypeScriptTemplateUtils.getAttribution(this.field);
     }
 
     public String getValue() {

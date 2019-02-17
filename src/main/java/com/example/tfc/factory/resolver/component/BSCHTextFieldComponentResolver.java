@@ -29,6 +29,6 @@ public class BSCHTextFieldComponentResolver extends ComponentResolver {
     }
 
     private void setModelVariable(PanelDTO panelDTO, String name){
-        panelDTO.getComponent().getFields().add(new TypeScriptFieldDTO(name, "null"));
+        panelDTO.getComponent().checkDeclaration(name, "null");
     }
 }

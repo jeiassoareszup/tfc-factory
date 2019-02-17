@@ -1,6 +1,7 @@
 package com.example.tfc.factory.parser;
 
 import com.example.tfc.factory.commons.dto.PanelDTO;
+import com.example.tfc.factory.commons.dto.TypeScriptFieldDTO;
 import com.example.tfc.factory.commons.dto.TypeScriptFunctionDTO;
 import com.example.tfc.factory.utils.TypeScriptTemplateUtils;
 import lombok.Getter;
@@ -18,7 +19,7 @@ public class RelationParser {
 
     public RelationParser(String condition, List<String> actions, List<String> elseActions) {
 
-        if(StringUtils.isEmpty(condition) || StringUtils.isEmpty(actions)){
+        if (StringUtils.isEmpty(condition) || StringUtils.isEmpty(actions)) {
             throw new IllegalArgumentException("condition and actions can not be empty");
         }
 
@@ -27,14 +28,18 @@ public class RelationParser {
         this.elseActions = elseActions;
     }
 
-    public TypeScriptFunctionDTO buildFunction(String name, PanelDTO panelDTO){
+    public TypeScriptFunctionDTO buildFunction(PanelDTO panelDTO, String name) {
 
         String type = condition.split(";")[1];
 
-        if("ISCLICKED".equals(type)){
+        if ("ISCLICKED".equals(type)) {
             StringBuilder body = new StringBuilder();
-            actions.forEach(a -> body.append(new ActionExpressionParser(a).evaluate()));
-            return new TypeScriptFunctionDTO(name, null, body.toString());
+            actions.forEach(a -> {
+                ActionExpressionParser parser = new ActionExpressionParser(a);
+                body.append(parser.evaluate());
+                panelDTO.getComponent().checkDeclaration(parser.getField().getName(), parser.getField().getValue());
+            });
+            return new TypeScriptFunctionDTO("", name, null, body.toString(), null);
         }
 
         String parsedCondition = new ConditionExpressionParser(this.condition).evaluate();
@@ -42,15 +47,28 @@ public class RelationParser {
         StringBuilder ifBody = new StringBuilder();
         StringBuilder elseBody = new StringBuilder();
 
-        this.actions.forEach(a -> ifBody.append(new ActionExpressionParser(a).evaluate()));
+        this.actions.forEach(a -> {
+            ActionExpressionParser parser = new ActionExpressionParser(a);
+            ifBody.append(parser.evaluate());
+            panelDTO.getComponent().checkDeclaration(parser.getField().getName(), parser.getField().getValue());
+        });
 
-        if(!CollectionUtils.isEmpty(this.elseActions)){
-            this.elseActions.forEach(a -> elseBody.append(new ActionExpressionParser(a).evaluate()));
+        if (!CollectionUtils.isEmpty(this.elseActions)) {
+            this.elseActions.forEach(a -> {
+                ActionExpressionParser parser = new ActionExpressionParser(a);
+                elseBody.append(parser.evaluate());
+                panelDTO.getComponent().checkDeclaration(parser.getField().getName(), parser.getField().getValue());
+            });
         }
 
         String body = TypeScriptTemplateUtils.getIf(parsedCondition, ifBody.toString(), elseBody.toString());
 
-        return new TypeScriptFunctionDTO(name, null, body);
+        return new TypeScriptFunctionDTO("", name, null, body, null);
     }
 
+    private void checkDeclaration(PanelDTO panelDTO, String var, String value) {
+        if (panelDTO.getComponent().getFields().stream().noneMatch(f -> f.getName().equals(var))) {
+            panelDTO.getComponent().getFields().add(new TypeScriptFieldDTO(var, value));
+        }
+    }
 }

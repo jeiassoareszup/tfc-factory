@@ -35,18 +35,25 @@ public final class TypeScriptTemplateUtils {
         }
         StringBuilder builder = new StringBuilder();
 
-        builder.append("%s(%s) {\n");
+        builder.append("%s %s(%s) {\n");
         builder.append("    %s\n");
+
+        if (!StringUtils.isEmpty(functionDTO.getRtrn())) {
+            builder.append("    return %s;\n");
+        }
+
         builder.append("}\n");
 
 
         return String.format(builder.toString(),
+                functionDTO.getAccess(),
                 functionDTO.getName(),
                 functionDTO.getParams() == null ? "" : String.join(", ", functionDTO.getParams()),
-                functionDTO.getBody());
+                functionDTO.getBody(),
+                functionDTO.getRtrn());
     }
 
-    public static void main(String[] args) {
+//    public static void main(String[] args) {
 //        StringBuilder all = new StringBuilder();
 //
 //        String[] names = {"Component"};
@@ -74,8 +81,8 @@ public final class TypeScriptTemplateUtils {
 //
 //
 //        System.out.println(all.toString());
-        System.out.println(getConstructor("Compnent", "HttpClient"));
-    }
+//        System.out.println(getConstructor("Component", "HttpClient"));
+//    }
 
     public static String getImport(TypeScriptImportDTO importDTO) {
 
@@ -102,6 +109,17 @@ public final class TypeScriptTemplateUtils {
         builder.append("\n");
 
         return String.format(builder.toString(), fieldDTO.getName(), fieldDTO.getValue());
+    }
+
+    public static String getInjectableDeclaration() {
+
+        StringBuilder builder = new StringBuilder();
+
+        builder.append("@Injectable({\n");
+        builder.append("    providedIn:  'root'\n");
+        builder.append("})\n");
+
+        return builder.toString();
     }
 
     public static String getComponentDeclaration(String selector, String templateUrl, String[] styleUrls) {
@@ -148,7 +166,7 @@ public final class TypeScriptTemplateUtils {
 
     }
 
-    public static String getConstructor(String ...params) {
+    public static String getConstructor(String... params) {
         if (StringUtils.isEmpty(params)) {
             return "";
         }
@@ -159,6 +177,36 @@ public final class TypeScriptTemplateUtils {
             args[i] = String.format("private  %s:  %s", Character.toLowerCase(params[i].charAt(0)) + params[i].substring(1), params[i]);
         }
 
-        return String.format("constructor(%s) {}", String.join(", ",args));
+        return String.format("constructor(%s) {}\n", String.join(", ", args));
     }
+
+    public static String getFunctionCall(String var, String functionName, boolean commented, String... params) {
+        StringBuilder builder = new StringBuilder();
+        if(commented) {
+            builder.append("// ");
+        }
+
+        String param = params == null || params.length == 0 ? "" : String.join(", ", params);
+
+        if (StringUtils.isEmpty(var)) {
+
+            builder.append(functionName);
+            builder.append("(");
+            builder.append(param);
+            builder.append(");\n");
+
+            return builder.toString();
+        }
+
+        builder.append("this.");
+        builder.append(var);
+        builder.append(" = ");
+        builder.append(functionName);
+        builder.append("(");
+        builder.append(param);
+        builder.append(");\n");
+
+        return builder.toString();
+    }
+
 }

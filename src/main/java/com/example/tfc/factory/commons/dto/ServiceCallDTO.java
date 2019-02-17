@@ -5,10 +5,8 @@ import lombok.Getter;
 
 @Getter
 @AllArgsConstructor
-public class TypeScriptFunctionDTO {
-    private String access;
+public class ServiceCallDTO {
     private String name;
-    private String[] params;
-    private String body;
+    private String[] args;
     private String rtrn;
 }

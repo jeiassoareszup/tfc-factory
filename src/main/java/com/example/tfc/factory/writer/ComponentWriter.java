@@ -28,6 +28,7 @@ public class ComponentWriter implements Writer {
             StringBuilder builder = new StringBuilder();
 
             panelDTO.getComponent().getImports().add(getDefaultImpot());
+            panelDTO.getComponent().getImports().add(new TypeScriptImportDTO(new String[]{Constants.GLOBAL_SERVICE_NAME}, "../../service/" + Constants.GLOBAL_SERVICE_FILE_NAME.substring(0, Constants.GLOBAL_SERVICE_FILE_NAME.length()-3)));
 
             if(panelDTO.getComponent().getFunctions().stream().noneMatch(f -> "ngOnInit".equals(f.getName()))){
                 panelDTO.getComponent().getFunctions().add(getOnInit());
@@ -39,6 +40,9 @@ public class ComponentWriter implements Writer {
             builder.append(TypeScriptTemplateUtils.getComponentDeclaration("app-" + panelDTO.getName(), "./"+ panelDTO.getHtml().getFileName(), null));
 
             StringBuilder body = new StringBuilder();
+
+            body.append(TypeScriptTemplateUtils.getConstructor(Constants.GLOBAL_SERVICE_NAME));
+            builder.append("\n");
 
             panelDTO.getComponent().getFields().forEach(f -> body.append(TypeScriptTemplateUtils.getFieldDeclaration(f)));
             panelDTO.getComponent().getFunctions().forEach(f -> body.append(TypeScriptTemplateUtils.getFunction(f)));
@@ -57,11 +61,6 @@ public class ComponentWriter implements Writer {
     }
 
     private TypeScriptFunctionDTO getOnInit(){
-        return new TypeScriptFunctionDTO("ngOnInit", null, "");
-    }
-
-    public static void main(String[] args) {
-        ComponentWriter writer = new ComponentWriter();
-        writer.write(null);
+        return new TypeScriptFunctionDTO("", "ngOnInit", null, "", null);
     }
 }

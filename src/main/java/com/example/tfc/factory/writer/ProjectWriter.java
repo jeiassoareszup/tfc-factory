@@ -29,6 +29,7 @@ public class ProjectWriter implements Writer {
             assert exitCode == 0;
 
             createComponentFolder(panelDTO);
+            createServiceFolder();
         } catch (IOException | InterruptedException e) {
             e.printStackTrace();
         }
@@ -36,6 +37,11 @@ public class ProjectWriter implements Writer {
 
     private void createComponentFolder(PanelDTO panelDTO) {
         new File(Constants.FULL_COMPONENT_FOLDER_PATH + panelDTO.getName()).mkdirs();
+    }
+
+
+    private void createServiceFolder() {
+        new File(Constants.FULL_SERVICE_FOLDER_PATH).mkdirs();
     }
 
     private static class StreamGobbler implements Runnable {

@@ -11,4 +11,10 @@ public class TypeScriptComponentDTO {
     private List<TypeScriptFunctionDTO> functions = new ArrayList<>();
     private List<TypeScriptFieldDTO> fields = new ArrayList<>();
     private List<TypeScriptImportDTO> imports = new ArrayList<>();
+
+    public void checkDeclaration(String var, String value) {
+        if (this.getFields().stream().noneMatch(f -> f.getName().equals(var))) {
+            this.getFields().add(new TypeScriptFieldDTO(var, value));
+        }
+    }
 }

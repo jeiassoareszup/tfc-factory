@@ -13,6 +13,7 @@ public class HTMLElementDTO {
     private String name;
     private List<HTMLElementAttributeDTO> attributes = new ArrayList<>();
     private String text;
+    private List<ServiceCallDTO> calls = new ArrayList<>();
     private List<HTMLElementDTO> children = new ArrayList<>();
 
     public HTMLElementDTO addAttribute(String name, String value) {

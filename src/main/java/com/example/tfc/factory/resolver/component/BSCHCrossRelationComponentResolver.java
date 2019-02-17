@@ -14,15 +14,15 @@ import java.util.Map;
 
 public class BSCHCrossRelationComponentResolver extends ComponentResolver {
 
-    private static Map<String, String[]> expressions = new HashMap<>();
+    private static Map<String, String> expressions = new HashMap<>();
 
     static {
-        expressions.put("BEHAVIOUR RDONLY", new String[]{Constants.READ_ONLY_ATTRIBUTE_NAME,  "false"});
-        expressions.put("BEHAVIOUR IREQ", new String[]{Constants.REQUIRED_ATTRIBUTE_NAME, "false"});
-        expressions.put("BEHAVIOUR OPT", new String[]{Constants.READ_ONLY_ATTRIBUTE_NAME, "false"});
-        expressions.put("BEHAVIOUR RDONLYEMPTY", new String[]{Constants.DISABLED_ATTRIBUTE_NAME, "false"});
-        expressions.put("VISIBLE false", new String[]{Constants.HIDDEN_ATTRIBUTE_NAME, "true"});
-        expressions.put("VISIBLE true", new String[]{Constants.HIDDEN_ATTRIBUTE_NAME, "true"});
+        expressions.put("BEHAVIOUR RDONLY", Constants.READ_ONLY_ATTRIBUTE_NAME);
+        expressions.put("BEHAVIOUR IREQ", Constants.REQUIRED_ATTRIBUTE_NAME);
+        expressions.put("BEHAVIOUR OPT", Constants.READ_ONLY_ATTRIBUTE_NAME);
+        expressions.put("BEHAVIOUR RDONLYEMPTY", Constants.DISABLED_ATTRIBUTE_NAME);
+        expressions.put("VISIBLE false", Constants.HIDDEN_ATTRIBUTE_NAME);
+        expressions.put("VISIBLE true", Constants.HIDDEN_ATTRIBUTE_NAME);
     }
 
     @Override
@@ -44,7 +44,7 @@ public class BSCHCrossRelationComponentResolver extends ComponentResolver {
         String functionName = getFunctionName(name);
 
         RelationParser relationParser = new RelationParser(condition, actions, elseActions);
-        panelDTO.getComponent().getFunctions().add(relationParser.buildFunction(functionName, panelDTO));
+        panelDTO.getComponent().getFunctions().add(relationParser.buildFunction(panelDTO, functionName));
     }
 
     private void buildHTML(PanelDTO panelDTO, List actions, List elseActions) {
@@ -52,7 +52,7 @@ public class BSCHCrossRelationComponentResolver extends ComponentResolver {
             actions.addAll(actions);
         }
 
-        Map<String, String[]> attToSet = new HashMap<>();
+        Map<String, String> attToSet = new HashMap<>();
 
         actions.forEach(a -> {
             String[] members = a.toString().split(";");
@@ -62,7 +62,7 @@ public class BSCHCrossRelationComponentResolver extends ComponentResolver {
             }
 
             if(!"CONTEXT".equals(members[1])){
-                String[] attribute = getAttributeName(members[1], members[5]);
+                String attribute = getAttributeName(members[1], members[5]);
                 attToSet.put(members[0], attribute);
             }
         });
@@ -70,13 +70,13 @@ public class BSCHCrossRelationComponentResolver extends ComponentResolver {
         setAttributes(panelDTO, attToSet);
     }
 
-    private void setAttributes(PanelDTO panelDTO, Map<String, String[]> attToSet) {
+    private void setAttributes(PanelDTO panelDTO, Map<String, String> attToSet) {
         panelDTO.getHtml().getElements().forEach(e -> attToSet.keySet().forEach(k -> {
-            String attribute = attToSet.get(k)[0];
+            String attribute = attToSet.get(k);
             if (e.canAddRelationAttribute(k, attribute)) {
                 String variableName = getVariableName(k, attribute);
                 e.addAttribute(attribute, variableName);
-                panelDTO.getComponent().getFields().add(new TypeScriptFieldDTO(variableName, attToSet.get(k)[1]));
+                panelDTO.getComponent().checkDeclaration(variableName, getDefaultFieldValue(variableName));
             }
         }));
     }
@@ -86,7 +86,7 @@ public class BSCHCrossRelationComponentResolver extends ComponentResolver {
         return Character.toLowerCase(name.charAt(0)) + name.substring(1);
     }
 
-    public static String[] getAttributeName(String action, String value){
+    public static String getAttributeName(String action, String value){
         return expressions.get(action + " " + value);
     }
 
@@ -109,4 +109,15 @@ public class BSCHCrossRelationComponentResolver extends ComponentResolver {
         }
     }
 
+    private String getDefaultFieldValue(String name) {
+           if(name.startsWith("rdonly") || name.startsWith("hidden") || name.startsWith("disable")){
+               return "false";
+           }
+
+           if(name.startsWith("require")){
+               return "true";
+           }
+
+           return "null";
+    }
 }

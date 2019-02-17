@@ -9,6 +9,7 @@ public class PanelDTO {
     private String title;
     private HTMLDTO html;
     private TypeScriptComponentDTO component;
+    private ServiceDTO service;
 
     public static PanelDTO init() {
 
@@ -22,6 +23,7 @@ public class PanelDTO {
         TypeScriptComponentDTO typeScriptComponentDTO = new TypeScriptComponentDTO();
         panelDTO.setComponent(typeScriptComponentDTO);
 
+        panelDTO.setService(new ServiceDTO());
         return panelDTO;
     }
 
