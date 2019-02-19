@@ -30,7 +30,7 @@ public class ActionExpressionParser extends ExpressionParser {
 
         if ("CONTEXT".equals(getAction())) {
             String value;
-            if("CONTEXT".equals(getParameter())){
+            if ("CONTEXT".equals(getParameter())) {
                 value = "this." + getOutput();
             } else {
                 value = getValue();
@@ -39,8 +39,16 @@ public class ActionExpressionParser extends ExpressionParser {
             return TypeScriptTemplateUtils.getAttribution(this.field);
         }
 
+        String value;
+
+        if("VISIBLE".equals(getAction())){
+            value = "!" + getValue();
+        } else {
+            value = getValue();
+        }
+
         String variableName = BSCHCrossRelationComponentResolver.getVariableName(getComponentName(), BSCHCrossRelationComponentResolver.getAttributeName(getAction(), getParameter()));
-        this.field = new TypeScriptFieldDTO(variableName, getValue());
+        this.field = new TypeScriptFieldDTO(variableName, value);
         return TypeScriptTemplateUtils.getAttribution(this.field);
     }
 

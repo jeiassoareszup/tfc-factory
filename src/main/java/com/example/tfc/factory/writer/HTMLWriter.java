@@ -30,7 +30,10 @@ public class HTMLWriter implements Writer {
             Document doc = builder.build(new StringReader(xml));
             panelDTO.getHtml().getElements().forEach(e -> writeHtmlElements(e, doc.getRootElement()));
 
-            XMLOutputter outputter = new XMLOutputter(Format.getPrettyFormat());
+            Format format = Format.getPrettyFormat();
+            format.setOmitDeclaration(true);
+
+            XMLOutputter outputter = new XMLOutputter(format);
             panelDTO.getHtml().setFileName(panelDTO.getName()+ ".html");
 
             outputter.output(doc, new FileWriter(Constants.FULL_COMPONENT_FOLDER_PATH + panelDTO.getName() + "/" + panelDTO.getHtml().getFileName()));

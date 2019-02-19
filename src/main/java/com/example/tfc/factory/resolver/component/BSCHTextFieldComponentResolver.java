@@ -2,7 +2,6 @@ package com.example.tfc.factory.resolver.component;
 
 import com.example.tfc.factory.commons.dto.HTMLElementDTO;
 import com.example.tfc.factory.commons.dto.PanelDTO;
-import com.example.tfc.factory.commons.dto.TypeScriptFieldDTO;
 import com.example.tfc.factory.commons.enums.HTMLElementType;
 import com.example.tfc.factory.utils.ReflectionUtils;
 
@@ -22,6 +21,7 @@ public class BSCHTextFieldComponentResolver extends ComponentResolver {
                 htmlElementDTO
                         .addAttribute("name", ReflectionUtils.getFieldValue(component, "getName"))
                         .addAttribute("[(ngModel)]", variable)
+                        .addAttribute("type", "text")
                         .addAttribute("maxlength", ReflectionUtils.getFieldValue(component, "getMaxChars"))
         );
 
@@ -29,6 +29,6 @@ public class BSCHTextFieldComponentResolver extends ComponentResolver {
     }
 
     private void setModelVariable(PanelDTO panelDTO, String name){
-        panelDTO.getComponent().checkDeclaration(name, "null");
+        panelDTO.getComponent().checkDeclaration(name, "''");
     }
 }

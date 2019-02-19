@@ -5,8 +5,8 @@ import com.example.tfc.factory.commons.dto.PanelDTO;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Component;
 
-import java.io.*;
-import java.util.function.Consumer;
+import java.io.File;
+import java.io.IOException;
 
 @Component
 @Qualifier("projectWriter")
@@ -22,9 +22,6 @@ public class ProjectWriter implements Writer {
 
             Process process = builder.start();
 
-//            StreamGobbler streamGobbler =
-//                    new StreamGobbler(process.getInputStream(), System.out::println);
-//            Executors.newSingleThreadExecutor().submit(streamGobbler);
             int exitCode = process.waitFor();
             assert exitCode == 0;
 
@@ -42,21 +39,5 @@ public class ProjectWriter implements Writer {
 
     private void createServiceFolder() {
         new File(Constants.FULL_SERVICE_FOLDER_PATH).mkdirs();
-    }
-
-    private static class StreamGobbler implements Runnable {
-        private InputStream inputStream;
-        private Consumer<String> consumer;
-
-        public StreamGobbler(InputStream inputStream, Consumer<String> consumer) {
-            this.inputStream = inputStream;
-            this.consumer = consumer;
-        }
-
-        @Override
-        public void run() {
-            new BufferedReader(new InputStreamReader(inputStream)).lines()
-                    .forEach(consumer);
-        }
     }
 }

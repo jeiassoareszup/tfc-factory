@@ -188,19 +188,14 @@ public final class TypeScriptTemplateUtils {
 
         String param = params == null || params.length == 0 ? "" : String.join(", ", params);
 
-        if (StringUtils.isEmpty(var)) {
+        if (!StringUtils.isEmpty(var)) {
 
-            builder.append(functionName);
-            builder.append("(");
-            builder.append(param);
-            builder.append(");\n");
-
-            return builder.toString();
+            builder.append("this.");
+            builder.append(var);
+            builder.append(" = ");
         }
 
         builder.append("this.");
-        builder.append(var);
-        builder.append(" = ");
         builder.append(functionName);
         builder.append("(");
         builder.append(param);

@@ -1,1 +1,2 @@
-VR90,get,localhost:8080
+VR90,get,http://localhost:9009/vr90
+test,get,http://localhost:9009/test

@@ -2,12 +2,11 @@ package com.example.tfc.factory.resolver.component;
 
 import com.example.tfc.factory.commons.Constants;
 import com.example.tfc.factory.commons.dto.PanelDTO;
-import com.example.tfc.factory.commons.dto.TypeScriptFieldDTO;
 import com.example.tfc.factory.parser.RelationParser;
 import com.example.tfc.factory.utils.ReflectionUtils;
-import org.springframework.util.CollectionUtils;
 import org.springframework.util.StringUtils;
 
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -17,9 +16,9 @@ public class BSCHCrossRelationComponentResolver extends ComponentResolver {
     private static Map<String, String> expressions = new HashMap<>();
 
     static {
-        expressions.put("BEHAVIOUR RDONLY", Constants.READ_ONLY_ATTRIBUTE_NAME);
+        expressions.put("BEHAVIOUR RDONLY", Constants.DISABLED_ATTRIBUTE_NAME);
         expressions.put("BEHAVIOUR IREQ", Constants.REQUIRED_ATTRIBUTE_NAME);
-        expressions.put("BEHAVIOUR OPT", Constants.READ_ONLY_ATTRIBUTE_NAME);
+        expressions.put("BEHAVIOUR OPT", Constants.DISABLED_ATTRIBUTE_NAME);
         expressions.put("BEHAVIOUR RDONLYEMPTY", Constants.DISABLED_ATTRIBUTE_NAME);
         expressions.put("VISIBLE false", Constants.HIDDEN_ATTRIBUTE_NAME);
         expressions.put("VISIBLE true", Constants.HIDDEN_ATTRIBUTE_NAME);
@@ -48,13 +47,12 @@ public class BSCHCrossRelationComponentResolver extends ComponentResolver {
     }
 
     private void buildHTML(PanelDTO panelDTO, List actions, List elseActions) {
-        if(CollectionUtils.isEmpty(elseActions)){
-            actions.addAll(actions);
-        }
+        ArrayList allActions = new ArrayList<>(actions);
+        allActions.addAll(elseActions);
 
         Map<String, String> attToSet = new HashMap<>();
 
-        actions.forEach(a -> {
+        allActions.forEach(a -> {
             String[] members = a.toString().split(";");
 
             if (members.length != 6) {
@@ -91,6 +89,7 @@ public class BSCHCrossRelationComponentResolver extends ComponentResolver {
     }
 
     public static String getVariableName(String componentName, String attributeName) {
+
         if (StringUtils.isEmpty(componentName) || StringUtils.isEmpty(attributeName)) {
             return null;
         }

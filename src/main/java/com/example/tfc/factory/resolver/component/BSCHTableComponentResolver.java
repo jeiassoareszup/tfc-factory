@@ -25,7 +25,7 @@ public class BSCHTableComponentResolver extends ComponentResolver {
 
         HTMLElementDTO elementRow = new HTMLElementDTO();
         String tableSource = ReflectionUtils.getFieldValue(component, "getDataNameForTable");
-        elementRow.addAttribute("*ngFor", "element of " + tableSource);
+        elementRow.addAttribute("*ngFor", "let element of " + tableSource + " | async");
         elementRow.setType(HTMLElementType.TABLE_ROW);
         table.getChildren().add(elementRow);
 

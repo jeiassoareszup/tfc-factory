@@ -1,5 +1,6 @@
 package com.example.tfc.factory.parser;
 
+import com.example.tfc.factory.commons.dto.TypeScriptComponentDTO;
 import lombok.Getter;
 
 import java.util.HashMap;
@@ -28,7 +29,8 @@ public class ConditionExpressionParser extends ExpressionParser {
             return "";
         }
 
-        builder.append(getComponentName());
+        builder.append("this.");
+        builder.append(TypeScriptComponentDTO.parseVariableName(getComponentName()));
         builder.append(" ");
         builder.append(operators.get(getOperator()));
         builder.append(" ");

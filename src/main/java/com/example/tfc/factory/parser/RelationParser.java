@@ -1,7 +1,6 @@
 package com.example.tfc.factory.parser;
 
 import com.example.tfc.factory.commons.dto.PanelDTO;
-import com.example.tfc.factory.commons.dto.TypeScriptFieldDTO;
 import com.example.tfc.factory.commons.dto.TypeScriptFunctionDTO;
 import com.example.tfc.factory.utils.TypeScriptTemplateUtils;
 import lombok.Getter;
@@ -50,6 +49,9 @@ public class RelationParser {
         this.actions.forEach(a -> {
             ActionExpressionParser parser = new ActionExpressionParser(a);
             ifBody.append(parser.evaluate());
+            if("CONTEXT".equals(parser.getParameter())){
+                panelDTO.getComponent().checkDeclaration(parser.getOutput(), "null");
+            }
             panelDTO.getComponent().checkDeclaration(parser.getField().getName(), parser.getField().getValue());
         });
 
@@ -64,11 +66,5 @@ public class RelationParser {
         String body = TypeScriptTemplateUtils.getIf(parsedCondition, ifBody.toString(), elseBody.toString());
 
         return new TypeScriptFunctionDTO("", name, null, body, null);
-    }
-
-    private void checkDeclaration(PanelDTO panelDTO, String var, String value) {
-        if (panelDTO.getComponent().getFields().stream().noneMatch(f -> f.getName().equals(var))) {
-            panelDTO.getComponent().getFields().add(new TypeScriptFieldDTO(var, value));
-        }
     }
 }

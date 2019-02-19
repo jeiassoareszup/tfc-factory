@@ -11,7 +11,6 @@ import com.example.tfc.factory.utils.TypeScriptTemplateUtils;
 import com.example.tfc.factory.writer.ServiceWriter;
 import org.springframework.util.StringUtils;
 
-import java.lang.reflect.Array;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
@@ -29,6 +28,8 @@ public class BSCHButtonComponentResolver extends ComponentResolver {
 
         if (!StringUtils.isEmpty(name)) {
             htmlElementDTO.addAttribute("(click)", clickFunctionName + "()");
+            htmlElementDTO.addAttribute("type", "submit");
+            htmlElementDTO.addAttribute("class", "bg-black");
         }
 
         panelDTO.getHtml().getElements().add(
@@ -56,6 +57,9 @@ public class BSCHButtonComponentResolver extends ComponentResolver {
                 createServiceCallFunction(panelDTO, component, i, clickBody);
             } else if ("com.ibm.bsch.client.launcher.LauncherCrossRelationByName".equals(clickProcess.get(i))) {
                 createRelationCallFunction(component, i, clickBody);
+            } else {
+                List clickProcessData = ReflectionUtils.getListField(component, "getClickProcessData");
+                panelDTO.getComponent().checkDeclaration(clickProcessData.get(i).toString().split(",")[0], "null");
             }
         }
     }
@@ -116,8 +120,12 @@ public class BSCHButtonComponentResolver extends ComponentResolver {
 
         String returnVariable = clickProcessOutData.size() <= index ? null : getReturnVariable(clickProcessOutData.get(index).toString());
 
+        if (!StringUtils.isEmpty(returnVariable)) {
+            panelDTO.getComponent().checkDeclaration(returnVariable, "null");
+        }
+
         body.append(TypeScriptTemplateUtils.getFunctionCall(returnVariable,
-                "this." + Character.toLowerCase(Constants.GLOBAL_SERVICE_NAME.charAt(0)) + Constants.GLOBAL_SERVICE_NAME.substring(1) + "." + ServiceWriter.getServiceFunctionName(processData[0]),
+                Character.toLowerCase(Constants.GLOBAL_SERVICE_NAME.charAt(0)) + Constants.GLOBAL_SERVICE_NAME.substring(1) + "." + ServiceWriter.getServiceFunctionName(processData[0]),
                 !serviceDescription.isPresent(), params));
 
     }
