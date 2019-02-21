@@ -167,7 +167,13 @@ public class BSCHButtonComponentResolver extends ComponentResolver {
     private String getParamVariable(String expression) {
 
         if (!StringUtils.isEmpty(expression) && expression.contains("*")) {
-            return "this." + expression.split("\\*")[1];
+            String[] split = expression.split("\\*");
+
+            if(split[1].startsWith("'") || split[1].startsWith("\"")){
+                return split[1];
+            }
+
+            return "this." + split[1];
         }
 
         return "''";

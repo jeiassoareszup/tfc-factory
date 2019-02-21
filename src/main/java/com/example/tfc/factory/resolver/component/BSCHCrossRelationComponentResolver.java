@@ -85,7 +85,7 @@ public class BSCHCrossRelationComponentResolver extends ComponentResolver {
     }
 
     public static String getAttributeName(String action, String value) {
-        return expressions.get(action.toLowerCase() + " " + value.toLowerCase());
+        return expressions.get(action.toUpperCase   () + " " + value.toUpperCase());
     }
 
     public static String getVariableName(String componentName, String attributeName) {
