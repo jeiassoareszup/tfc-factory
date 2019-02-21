@@ -20,8 +20,8 @@ public class BSCHCrossRelationComponentResolver extends ComponentResolver {
         expressions.put("BEHAVIOUR IREQ", Constants.REQUIRED_ATTRIBUTE_NAME);
         expressions.put("BEHAVIOUR OPT", Constants.DISABLED_ATTRIBUTE_NAME);
         expressions.put("BEHAVIOUR RDONLYEMPTY", Constants.DISABLED_ATTRIBUTE_NAME);
-        expressions.put("VISIBLE false", Constants.HIDDEN_ATTRIBUTE_NAME);
-        expressions.put("VISIBLE true", Constants.HIDDEN_ATTRIBUTE_NAME);
+        expressions.put("VISIBLE FALSE", Constants.HIDDEN_ATTRIBUTE_NAME);
+        expressions.put("VISIBLE TRUE", Constants.HIDDEN_ATTRIBUTE_NAME);
     }
 
     @Override
@@ -59,7 +59,7 @@ public class BSCHCrossRelationComponentResolver extends ComponentResolver {
                 throw new IllegalArgumentException("Expression must have 6 members");
             }
 
-            if(!"CONTEXT".equals(members[1])){
+            if (!"CONTEXT".equals(members[1]) &&  !"ISCLICKED".equals(members[1])) {
                 String attribute = getAttributeName(members[1], members[5]);
                 attToSet.put(members[0], attribute);
             }
@@ -79,13 +79,13 @@ public class BSCHCrossRelationComponentResolver extends ComponentResolver {
         }));
     }
 
-    public static String getFunctionName(String relationName){
+    public static String getFunctionName(String relationName) {
         String name = relationName.replaceAll(Constants.REGEX_REMOVE_SPECIAL_CHARACTERS, "");
         return Character.toLowerCase(name.charAt(0)) + name.substring(1);
     }
 
-    public static String getAttributeName(String action, String value){
-        return expressions.get(action + " " + value);
+    public static String getAttributeName(String action, String value) {
+        return expressions.get(action.toLowerCase() + " " + value.toLowerCase());
     }
 
     public static String getVariableName(String componentName, String attributeName) {
@@ -109,14 +109,14 @@ public class BSCHCrossRelationComponentResolver extends ComponentResolver {
     }
 
     private String getDefaultFieldValue(String name) {
-           if(name.startsWith("rdonly") || name.startsWith("hidden") || name.startsWith("disable")){
-               return "false";
-           }
+        if (name.startsWith("rdonly") || name.startsWith("hidden") || name.startsWith("disable")) {
+            return "false";
+        }
 
-           if(name.startsWith("require")){
-               return "true";
-           }
+        if (name.startsWith("require")) {
+            return "true";
+        }
 
-           return "null";
+        return "null";
     }
 }

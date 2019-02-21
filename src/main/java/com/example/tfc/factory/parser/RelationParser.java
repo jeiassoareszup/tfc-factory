@@ -7,6 +7,7 @@ import lombok.Getter;
 import org.springframework.util.CollectionUtils;
 import org.springframework.util.StringUtils;
 
+import java.util.ArrayList;
 import java.util.List;
 
 @Getter
@@ -41,7 +42,7 @@ public class RelationParser {
             return new TypeScriptFunctionDTO("", name, null, body.toString(), null);
         }
 
-        String parsedCondition = new ConditionExpressionParser(this.condition).evaluate();
+        String parsedCondition = parseCondition();
 
         StringBuilder ifBody = new StringBuilder();
         StringBuilder elseBody = new StringBuilder();
@@ -49,7 +50,7 @@ public class RelationParser {
         this.actions.forEach(a -> {
             ActionExpressionParser parser = new ActionExpressionParser(a);
             ifBody.append(parser.evaluate());
-            if("CONTEXT".equals(parser.getParameter())){
+            if ("CONTEXT".equals(parser.getParameter())) {
                 panelDTO.getComponent().checkDeclaration(parser.getOutput(), "null");
             }
             panelDTO.getComponent().checkDeclaration(parser.getField().getName(), parser.getField().getValue());
@@ -66,5 +67,41 @@ public class RelationParser {
         String body = TypeScriptTemplateUtils.getIf(parsedCondition, ifBody.toString(), elseBody.toString());
 
         return new TypeScriptFunctionDTO("", name, null, body, null);
+    }
+
+    private String parseCondition() {
+
+        if (this.condition.contains("||") || this.condition.contains("&&")) {
+
+            String[] conditions = condition.split("\\|{2}|\\&{2}");
+
+            List<String> ops = new ArrayList<>();
+
+            String acc = "";
+            for (int i = 0; i < conditions.length - 1; i++) {
+                String op = this.condition.substring(acc.length() + conditions[i].length(), acc.length() + conditions[i].length() + 2);
+                ops.add(op);
+                acc = acc.concat(conditions[i]);
+                acc = acc.concat(op);
+            }
+
+            StringBuilder builder = new StringBuilder();
+
+            for (int i = 0; i < conditions.length; i++) {
+
+                builder.append(new ConditionExpressionParser(conditions[i]).evaluate());
+
+                if (i < conditions.length - 1) {
+                    builder.append(" ");
+                    builder.append(ops.get(i));
+                    builder.append(" ");
+                }
+            }
+
+            return builder.toString();
+        }
+
+
+        return new ConditionExpressionParser(this.condition).evaluate();
     }
 }

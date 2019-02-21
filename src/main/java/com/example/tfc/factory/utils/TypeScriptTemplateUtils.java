@@ -180,9 +180,9 @@ public final class TypeScriptTemplateUtils {
         return String.format("constructor(%s) {}\n", String.join(", ", args));
     }
 
-    public static String getFunctionCall(String var, String functionName, boolean commented, String... params) {
+    public static String getFunctionCall(String var, String functionName, boolean commented, boolean inner, String... params) {
         StringBuilder builder = new StringBuilder();
-        if(commented) {
+        if (commented) {
             builder.append("// ");
         }
 
@@ -195,7 +195,10 @@ public final class TypeScriptTemplateUtils {
             builder.append(" = ");
         }
 
-        builder.append("this.");
+        if(inner){
+            builder.append("this.");
+        }
+
         builder.append(functionName);
         builder.append("(");
         builder.append(param);
@@ -204,4 +207,16 @@ public final class TypeScriptTemplateUtils {
         return builder.toString();
     }
 
+    public static String getNgModule(String[] declarations, String[] imports, String[] providers, String[] bootstrap) {
+        StringBuilder builder = new StringBuilder();
+
+        builder.append("@NgModule({\n");
+        builder.append("    declarations: [%s], \n");
+        builder.append("    imports: [%s], \n");
+        builder.append("    providers: [%s], \n");
+        builder.append("    bootstrap: [%s] \n");
+        builder.append("})\n");
+
+        return String.format(builder.toString(), String.join(", ", declarations), String.join(", ", imports), String.join(", ", providers), String.join(", ", bootstrap));
+    }
 }

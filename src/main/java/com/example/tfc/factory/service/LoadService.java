@@ -5,11 +5,12 @@ import com.example.tfc.factory.commons.dto.PanelDTO;
 import com.example.tfc.factory.commons.dto.ServiceDescriptionDTO;
 import com.example.tfc.factory.resolver.ResolverManager;
 import com.example.tfc.factory.utils.ReflectionUtils;
-import com.example.tfc.factory.writer.Writer;
+import com.example.tfc.factory.writer.*;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Service;
 import org.springframework.util.CollectionUtils;
+import org.springframework.util.ResourceUtils;
 
 import java.io.File;
 import java.io.IOException;
@@ -22,27 +23,27 @@ import java.util.Scanner;
 @Service
 public class LoadService {
 
-    private Writer htmlWriter;
-    private Writer projectWriter;
-    private Writer componentWriter;
-    private Writer serviceWriter;
+    private HTMLWriter htmlWriter;
+    private ProjectWriter projectWriter;
+    private ComponentWriter componentWriter;
+    private ServiceWriter serviceWriter;
 
     @Autowired
-    public LoadService(@Qualifier("htmlWriter") Writer htmlWriter, @Qualifier("projectWriter") Writer projectWriter, @Qualifier("componentWriter") Writer componentWriter, @Qualifier("serviceWriter") Writer serviceWriter) {
+    public LoadService(@Qualifier("htmlWriter") HTMLWriter htmlWriter, @Qualifier("projectWriter") ProjectWriter projectWriter, @Qualifier("componentWriter") ComponentWriter componentWriter, @Qualifier("serviceWriter") ServiceWriter serviceWriter) {
         this.htmlWriter = htmlWriter;
         this.projectWriter = projectWriter;
         this.componentWriter = componentWriter;
         this.serviceWriter = serviceWriter;
     }
 
-    public void load() {
+    public void load(String clazz) {
 
         URL[] urls = {};
 
         try (JarFileLoader loader = new JarFileLoader(urls)) {
 
             loader.addFile(Constants.EXTERNAL_JARS_FOLDER_PATH + "test.jar");
-            Class<?> aClass = loader.loadClass("com.ibm.bsch.client.bmlclasses.BRVR085");
+            Class<?> aClass = loader.loadClass(clazz);
 
             Object instance = aClass.newInstance();
             Method exec = aClass.getMethod("exec");
@@ -72,6 +73,7 @@ public class LoadService {
         htmlWriter.write(panelDTO);
         componentWriter.write(panelDTO);
         serviceWriter.write(panelDTO);
+        projectWriter.bindFiles(panelDTO);
     }
 
     private void buildComponents(List components, int i, PanelDTO panelDTO) {

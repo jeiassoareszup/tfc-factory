@@ -1,8 +1,10 @@
 package com.example.tfc.factory.controller;
 
+import com.example.tfc.factory.commons.dto.LoadClassDTO;
 import com.example.tfc.factory.service.LoadService;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RestController;
 
 @RestController
@@ -15,8 +17,8 @@ public class LoadController {
         this.loadService = loadService;
     }
 
-    @GetMapping("/load")
-    public void load() {
-        loadService.load();
+    @PostMapping("/load")
+    public void load(@RequestBody LoadClassDTO dto) {
+        loadService.load(dto.getClazz());
     }
 }

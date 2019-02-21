@@ -52,16 +52,48 @@ public class BSCHButtonComponentResolver extends ComponentResolver {
 
     private void getFunctionCalls(PanelDTO panelDTO, Object component, StringBuilder clickBody) {
         List clickProcess = ReflectionUtils.getListField(component, "getClickProcess");
+
         for (int i = 0; i < clickProcess.size(); i++) {
-            if ("com.ibm.bsch.client.launcher.ExecuteTransaction".equals(clickProcess.get(i))) {
-                createServiceCallFunction(panelDTO, component, i, clickBody);
-            } else if ("com.ibm.bsch.client.launcher.LauncherCrossRelationByName".equals(clickProcess.get(i))) {
-                createRelationCallFunction(component, i, clickBody);
+            String process = ReflectionUtils.getFieldValue(clickProcess.get(i), "getName");
+            if ("com.ibm.bsch.client.launcher.ExecuteTransaction".equals(process)) {
+                createServiceCallFunction(panelDTO, clickProcess.get(i), clickBody);
+            } else if ("com.ibm.bsch.client.launcher.LauncherCrossRelationByName".equals(process)) {
+                createRelationCallFunction(clickProcess.get(i), clickBody);
             } else {
-                List clickProcessData = ReflectionUtils.getListField(component, "getClickProcessData");
-                panelDTO.getComponent().checkDeclaration(clickProcessData.get(i).toString().split(",")[0], "null");
+                String data = ReflectionUtils.getFieldValue(clickProcess.get(i), "getData");
+                if(!StringUtils.isEmpty(data)) {
+                    panelDTO.getComponent().checkDeclaration(data.split(",")[0], "null");
+                }
+
+                logNotImplementedAction(clickProcess.get(i), clickBody);
             }
         }
+    }
+
+    private void logNotImplementedAction(Object process, StringBuilder clickBody) {
+
+        String name = ReflectionUtils.getFieldValue(process, "getName");
+        String processData = ReflectionUtils.getFieldValue(process, "getData");
+        String processParameters = ReflectionUtils.getFieldValue(process, "getParameters");
+        String processOutData = ReflectionUtils.getFieldValue(process, "getOutData");
+
+        StringBuilder builder = new StringBuilder();
+        builder.append(String.format("\"Not implemented action: %s\\n", name));
+
+        if (StringUtils.isEmpty(processData)) {
+            builder.append(String.format("clickProcessData: %s\\n", processData));
+        }
+
+        if (StringUtils.isEmpty(processParameters)) {
+            builder.append(String.format("clickProcessParameters: %s\\n", processData));
+        }
+
+        if (StringUtils.isEmpty(processOutData)) {
+            builder.append(String.format("clickProcessOutData: %s\\n", processOutData));
+        }
+
+        builder.append("\"");
+        clickBody.append(TypeScriptTemplateUtils.getFunctionCall(null, "console.warn", false, false, builder.toString()));
     }
 
     public String getClickProcessFunctionName(String componentName) {
@@ -73,19 +105,21 @@ public class BSCHButtonComponentResolver extends ComponentResolver {
     }
 
 
-    private void createRelationCallFunction(Object component, int index, StringBuilder body) {
-        List clickProcessData = ReflectionUtils.getListField(component, "getClickProcessData");
-        String[] relations = clickProcessData.get(index).toString().split(",");
+    private void createRelationCallFunction(Object process, StringBuilder body) {
+        String data = ReflectionUtils.getFieldValue(process, "getData");
+        String[] relations = data.split(",");
 
         for (String relation : relations) {
-            body.append(TypeScriptTemplateUtils.getFunctionCall(null, BSCHCrossRelationComponentResolver.getFunctionName(relation), false));
+            body.append(TypeScriptTemplateUtils.getFunctionCall(null, BSCHCrossRelationComponentResolver.getFunctionName(relation), false, true));
         }
     }
 
-    public void createServiceCallFunction(PanelDTO panelDTO, Object component, int index, StringBuilder body) {
-        List clickProcessData = ReflectionUtils.getListField(component, "getClickProcessData");
-        List clickProcessOutData = ReflectionUtils.getListField(component, "getClickProcessOutData");
-        String[] processData = clickProcessData.get(index).toString().split(",");
+    public void createServiceCallFunction(PanelDTO panelDTO, Object process, StringBuilder body) {
+
+        String data = ReflectionUtils.getFieldValue(process, "getData");
+        String outData = ReflectionUtils.getFieldValue(process, "getOutData");
+
+        String[] processData = data.split(",");
 
 
         Optional<ServiceDescriptionDTO> serviceDescription = panelDTO.getService().getDescriptions().stream().filter(d -> d.getName().equals(processData[0])).findFirst();
@@ -118,7 +152,7 @@ public class BSCHButtonComponentResolver extends ComponentResolver {
             params = paramList.toArray(new String[paramList.size()]);
         }
 
-        String returnVariable = clickProcessOutData.size() <= index ? null : getReturnVariable(clickProcessOutData.get(index).toString());
+        String returnVariable = StringUtils.isEmpty(outData) ? null : getReturnVariable(outData);
 
         if (!StringUtils.isEmpty(returnVariable)) {
             panelDTO.getComponent().checkDeclaration(returnVariable, "null");
@@ -126,7 +160,7 @@ public class BSCHButtonComponentResolver extends ComponentResolver {
 
         body.append(TypeScriptTemplateUtils.getFunctionCall(returnVariable,
                 Character.toLowerCase(Constants.GLOBAL_SERVICE_NAME.charAt(0)) + Constants.GLOBAL_SERVICE_NAME.substring(1) + "." + ServiceWriter.getServiceFunctionName(processData[0]),
-                !serviceDescription.isPresent(), params));
+                !serviceDescription.isPresent(), true, params));
 
     }
 
