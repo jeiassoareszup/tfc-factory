@@ -1,8 +1,5 @@
 package com.example.tfc.factory.commons.dto;
 
-import lombok.Data;
-
-@Data
 public class PanelDTO {
 
     private String name;
@@ -27,4 +24,43 @@ public class PanelDTO {
         return panelDTO;
     }
 
+    public String getName() {
+        return name;
+    }
+
+    public void setName(String name) {
+        this.name = name;
+    }
+
+    public String getTitle() {
+        return title;
+    }
+
+    public void setTitle(String title) {
+        this.title = title;
+    }
+
+    public HTMLDTO getHtml() {
+        return html;
+    }
+
+    public void setHtml(HTMLDTO html) {
+        this.html = html;
+    }
+
+    public TypeScriptComponentDTO getComponent() {
+        return component;
+    }
+
+    public void setComponent(TypeScriptComponentDTO component) {
+        this.component = component;
+    }
+
+    public ServiceDTO getService() {
+        return service;
+    }
+
+    public void setService(ServiceDTO service) {
+        this.service = service;
+    }
 }

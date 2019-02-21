@@ -1,8 +1,13 @@
 package com.example.tfc.factory.commons.dto;
 
-import lombok.Data;
-
-@Data
 public class ComponentDTO {
     private TypeScriptComponentDTO ts;
+
+    public TypeScriptComponentDTO getTs() {
+        return ts;
+    }
+
+    public void setTs(TypeScriptComponentDTO ts) {
+        this.ts = ts;
+    }
 }

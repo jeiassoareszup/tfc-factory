@@ -3,12 +3,10 @@ package com.example.tfc.factory.parser;
 import com.example.tfc.factory.commons.dto.TypeScriptFieldDTO;
 import com.example.tfc.factory.resolver.component.BSCHCrossRelationComponentResolver;
 import com.example.tfc.factory.utils.TypeScriptTemplateUtils;
-import lombok.Getter;
 
 import java.util.HashMap;
 import java.util.Map;
 
-@Getter
 public class ActionExpressionParser extends ExpressionParser {
 
     private static Map<String, String> behaviorsValues = new HashMap<>();
@@ -23,6 +21,14 @@ public class ActionExpressionParser extends ExpressionParser {
 
     public ActionExpressionParser(String expression) {
         super(expression);
+    }
+
+    public static Map<String, String> getBehaviorsValues() {
+        return behaviorsValues;
+    }
+
+    public TypeScriptFieldDTO getField() {
+        return field;
     }
 
     @Override
@@ -41,7 +47,7 @@ public class ActionExpressionParser extends ExpressionParser {
 
         String value;
 
-        if("VISIBLE".equals(getAction())){
+        if ("VISIBLE".equals(getAction())) {
             value = "!" + getValue();
         } else {
             value = getValue();

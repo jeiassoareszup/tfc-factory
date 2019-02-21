@@ -3,14 +3,12 @@ package com.example.tfc.factory.parser;
 import com.example.tfc.factory.commons.dto.PanelDTO;
 import com.example.tfc.factory.commons.dto.TypeScriptFunctionDTO;
 import com.example.tfc.factory.utils.TypeScriptTemplateUtils;
-import lombok.Getter;
 import org.springframework.util.CollectionUtils;
 import org.springframework.util.StringUtils;
 
 import java.util.ArrayList;
 import java.util.List;
 
-@Getter
 public class RelationParser {
 
     private String condition;
@@ -26,6 +24,18 @@ public class RelationParser {
         this.condition = condition;
         this.actions = actions;
         this.elseActions = elseActions;
+    }
+
+    public String getCondition() {
+        return condition;
+    }
+
+    public List<String> getActions() {
+        return actions;
+    }
+
+    public List<String> getElseActions() {
+        return elseActions;
     }
 
     public TypeScriptFunctionDTO buildFunction(PanelDTO panelDTO, String name) {

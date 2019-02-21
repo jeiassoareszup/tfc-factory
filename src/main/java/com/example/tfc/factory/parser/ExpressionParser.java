@@ -1,11 +1,8 @@
 package com.example.tfc.factory.parser;
 
-import lombok.Getter;
-
 import java.util.HashMap;
 import java.util.Map;
 
-@Getter
 public abstract class ExpressionParser {
 
     private static Map<String, String> behaviorsValues = new HashMap<>();
@@ -19,6 +16,34 @@ public abstract class ExpressionParser {
 
     public ExpressionParser(String condition) {
         this.parse(condition);
+    }
+
+    public static Map<String, String> getBehaviorsValues() {
+        return behaviorsValues;
+    }
+
+    public String getComponentName() {
+        return componentName;
+    }
+
+    public String getAction() {
+        return action;
+    }
+
+    public String getParameterType() {
+        return parameterType;
+    }
+
+    public String getOperator() {
+        return operator;
+    }
+
+    public String getOutput() {
+        return output;
+    }
+
+    public String getParameter() {
+        return parameter;
     }
 
     private void parse(String expression) {
@@ -38,11 +63,11 @@ public abstract class ExpressionParser {
 
     abstract String evaluate();
 
-    String decorateValue(String value){
+    String decorateValue(String value) {
 
         if ("ALPHANUMERIC".equals(getParameterType()) && "VALUE".equals(getOutput())) {
 
-            if("NULL".equals(value)){
+            if ("NULL".equals(value)) {
                 return value.toLowerCase();
             }
 

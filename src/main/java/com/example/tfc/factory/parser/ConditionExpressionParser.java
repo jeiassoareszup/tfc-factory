@@ -1,12 +1,10 @@
 package com.example.tfc.factory.parser;
 
 import com.example.tfc.factory.commons.dto.TypeScriptComponentDTO;
-import lombok.Getter;
 
 import java.util.HashMap;
 import java.util.Map;
 
-@Getter
 public class ConditionExpressionParser extends ExpressionParser {
 
     private static Map<String, String> operators = new HashMap<>();
