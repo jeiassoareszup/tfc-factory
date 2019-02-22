@@ -1,5 +1,6 @@
 package com.example.tfc.factory.parser;
 
+import com.example.tfc.factory.commons.dto.TypeScriptComponentDTO;
 import com.example.tfc.factory.commons.dto.TypeScriptFieldDTO;
 import com.example.tfc.factory.resolver.component.BSCHCrossRelationComponentResolver;
 import com.example.tfc.factory.utils.TypeScriptTemplateUtils;
@@ -15,7 +16,7 @@ public class ActionExpressionParser extends ExpressionParser {
     static {
         behaviorsValues.put("OPT", "false");
         behaviorsValues.put("RDONLY", "true");
-        behaviorsValues.put("EREQ", "true");
+        behaviorsValues.put("IREQ", "true");
         behaviorsValues.put("RDONLYEMPTY", "true");
     }
 
@@ -34,6 +35,10 @@ public class ActionExpressionParser extends ExpressionParser {
     @Override
     String evaluate() {
 
+        if("ISCLICKED".equals(getAction())){
+            return null;
+        }
+
         if ("CONTEXT".equals(getAction())) {
             String value;
             if ("CONTEXT".equals(getParameter())) {
@@ -41,7 +46,7 @@ public class ActionExpressionParser extends ExpressionParser {
             } else {
                 value = getValue();
             }
-            this.field = new TypeScriptFieldDTO(getComponentName(), value);
+            this.field = new TypeScriptFieldDTO(TypeScriptComponentDTO.parseVariableName(getComponentName()), value);
             return TypeScriptTemplateUtils.getAttribution(this.field);
         }
 

@@ -21,16 +21,17 @@ public class HTMLWriter implements Writer {
     @Override
     public void write(PanelDTO panelDTO) {
 
-        String xml = "<div>" +
+        String xml = "<div class=\"container\"><div class=\"row\"></div>" +
                 "</div>";
 
         SAXBuilder builder = new SAXBuilder();
 
         try {
             Document doc = builder.build(new StringReader(xml));
-            panelDTO.getHtml().getElements().forEach(e -> writeHtmlElements(e, doc.getRootElement()));
+            panelDTO.getHtml().getElements().forEach(e -> writeHtmlElements(e, doc.getRootElement().getChild("div")));
 
             Format format = Format.getPrettyFormat();
+            format.setExpandEmptyElements(true);
             format.setOmitDeclaration(true);
 
             XMLOutputter outputter = new XMLOutputter(format);

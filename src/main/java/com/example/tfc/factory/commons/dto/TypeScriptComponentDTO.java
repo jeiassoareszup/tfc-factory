@@ -45,11 +45,17 @@ public class TypeScriptComponentDTO {
     }
 
     public void checkDeclaration(String var, String value) {
-        if (!StringUtils.isEmpty(var) && this.getFields().stream().noneMatch(f -> f.getName().equals(var))) {
+        String parsedName = parseVariableName(var);
+        if (!StringUtils.isEmpty(var) && this.getFields().stream().noneMatch(f -> f.getName().equals(parsedName))) {
             if (!StringUtils.isEmpty(value) && value.startsWith("!")) {
                 value = value.substring(1);
             }
-            this.getFields().add(new TypeScriptFieldDTO(parseVariableName(var), value));
+            this.getFields().add(new TypeScriptFieldDTO(parsedName, value));
+        } else if(value.startsWith("this.")) {
+            String parsedValue = value.substring(5);
+            if (this.getFields().stream().noneMatch(f -> f.getName().equals(parsedValue))) {
+                this.getFields().add(new TypeScriptFieldDTO(parsedValue, "null"));
+            }
         }
     }
 
@@ -58,7 +64,6 @@ public class TypeScriptComponentDTO {
             return null;
         }
 
-        String result = name.replaceAll(Constants.REGEX_REMOVE_SPECIAL_CHARACTERS, "");
-        return result;
+        return name.replaceAll(Constants.REGEX_REMOVE_SPECIAL_CHARACTERS, "");
     }
 }

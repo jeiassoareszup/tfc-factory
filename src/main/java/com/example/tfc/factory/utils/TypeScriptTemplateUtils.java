@@ -119,7 +119,7 @@ public final class TypeScriptTemplateUtils {
         builder.append("    providedIn:  'root'\n");
         builder.append("})\n");
 
-        return builder.toString();
+        return "@Injectable()";
     }
 
     public static String getComponentDeclaration(String selector, String templateUrl, String[] styleUrls) {

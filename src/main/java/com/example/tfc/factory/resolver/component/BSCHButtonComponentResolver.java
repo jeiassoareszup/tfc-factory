@@ -20,6 +20,7 @@ public class BSCHButtonComponentResolver extends ComponentResolver {
     @Override
     public PanelDTO resolve(Object component, PanelDTO panelDTO) {
 
+
         HTMLElementDTO htmlElementDTO = new HTMLElementDTO();
         htmlElementDTO.setType(HTMLElementType.BUTTON);
         htmlElementDTO.setText(ReflectionUtils.getFieldValue(component, "getText"));
@@ -29,13 +30,15 @@ public class BSCHButtonComponentResolver extends ComponentResolver {
         if (!StringUtils.isEmpty(name)) {
             htmlElementDTO.addAttribute("(click)", clickFunctionName + "()");
             htmlElementDTO.addAttribute("type", "submit");
-            htmlElementDTO.addAttribute("class", "bg-black");
+            htmlElementDTO.addAttribute("style", "background-color: #424455; border-radius: 100px");
         }
 
-        panelDTO.getHtml().getElements().add(
-                htmlElementDTO
-                        .addAttribute("name", name)
-        );
+        htmlElementDTO.addAttribute("name", name);
+
+        HTMLElementDTO div = getDefaultDiv();
+        div.getChildren().add(htmlElementDTO);
+
+        panelDTO.getHtml().getElements().add(div);
 
         buildClickFunction(component, panelDTO, clickFunctionName);
 
@@ -180,9 +183,16 @@ public class BSCHButtonComponentResolver extends ComponentResolver {
     }
 
     private String getReturnVariable(String expression) {
-        if (!StringUtils.isEmpty(expression) && expression.contains("*")) {
-            return expression.split("\\*")[0];
+        String[] first = expression.split(",");
+
+        if(first.length < 2){
+            return first[0].split("\\*")[0];
         }
+
+        if (!StringUtils.isEmpty(first[1]) && first[1].contains("*")) {
+            return first[1].split("\\*")[0];
+        }
+
         return "";
     }
 }

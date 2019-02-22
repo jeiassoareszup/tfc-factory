@@ -48,22 +48,28 @@ public class RelationParser {
                 ActionExpressionParser parser = new ActionExpressionParser(a);
                 body.append(parser.evaluate());
                 panelDTO.getComponent().checkDeclaration(parser.getField().getName(), parser.getField().getValue());
+                if (parser.getField().getValue().startsWith("this.")) {
+                    panelDTO.getComponent().checkDeclaration(parser.getField().getValue().substring(5), "null");
+                }
             });
             return new TypeScriptFunctionDTO("", name, null, body.toString(), null);
         }
 
-        String parsedCondition = parseCondition();
+        String parsedCondition = parseCondition(panelDTO, type);
 
         StringBuilder ifBody = new StringBuilder();
         StringBuilder elseBody = new StringBuilder();
 
         this.actions.forEach(a -> {
             ActionExpressionParser parser = new ActionExpressionParser(a);
-            ifBody.append(parser.evaluate());
-            if ("CONTEXT".equals(parser.getParameter())) {
-                panelDTO.getComponent().checkDeclaration(parser.getOutput(), "null");
+            String evaluated = parser.evaluate();
+            if (!StringUtils.isEmpty(evaluated)) {
+                ifBody.append(evaluated);
+                if ("CONTEXT".equals(parser.getParameter())) {
+                    panelDTO.getComponent().checkDeclaration(parser.getOutput(), "null");
+                }
+                panelDTO.getComponent().checkDeclaration(parser.getField().getName(), parser.getField().getValue());
             }
-            panelDTO.getComponent().checkDeclaration(parser.getField().getName(), parser.getField().getValue());
         });
 
         if (!CollectionUtils.isEmpty(this.elseActions)) {
@@ -79,7 +85,8 @@ public class RelationParser {
         return new TypeScriptFunctionDTO("", name, null, body, null);
     }
 
-    private String parseCondition() {
+    // TODO: modificar type para funcoes com ||
+    private String parseCondition(PanelDTO panelDTO, String type) {
 
         if (this.condition.contains("||") || this.condition.contains("&&")) {
 
@@ -99,6 +106,13 @@ public class RelationParser {
 
             for (int i = 0; i < conditions.length; i++) {
 
+                String[] parsed = conditions[i].split(";");
+
+                if ("CONTEXT".equals(parsed[1])) {
+                    String[] split = conditions[i].split(";");
+                    checkAttribution(panelDTO, split);
+                }
+
                 builder.append(new ConditionExpressionParser(conditions[i]).evaluate());
 
                 if (i < conditions.length - 1) {
@@ -108,10 +122,46 @@ public class RelationParser {
                 }
             }
 
-            return builder.toString();
+            String result = builder.toString();
+
+            if (result.endsWith("|| ")) {
+                result = result.substring(0, result.length() - 4);
+            }
+
+            return result;
         }
 
 
+        if ("CONTEXT".equals(type)) {
+            String[] split = this.condition.split(";");
+            checkAttribution(panelDTO, split);
+        }
+
         return new ConditionExpressionParser(this.condition).evaluate();
+    }
+
+    private void checkAttribution(PanelDTO panelDTO, String[] split) {
+        String value;
+
+        if ("CONTEXT".equals(split[5])) {
+            value = "this." + split[4];
+        } else {
+            value = split[5];
+        }
+
+        panelDTO.getComponent().checkDeclaration(split[0], decorateValue(value, split[2], split[4]));
+    }
+
+    private String decorateValue(String value, String parameterType, String output) {
+
+        if ("ALPHANUMERIC".equals(parameterType) && "VALUE".equals(output)) {
+
+            if ("NULL".equals(value)) {
+                return value.toLowerCase();
+            }
+
+            return "\"" + value + "\"";
+        }
+        return value;
     }
 }
