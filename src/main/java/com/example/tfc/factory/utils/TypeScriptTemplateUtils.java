@@ -234,7 +234,7 @@ public final class TypeScriptTemplateUtils {
                                 return new String[]{s, s};
                             }
                         })
-                        .map(sT -> "this." + sT[0] + " = result." + sT[1])
+                        .map(sT -> "this." + sT[0] + " = " + (!StringUtils.contains(sT[1], "'") ? "result."+sT[1] : "''"))
                         .collect(Collectors.toList())
         );
 

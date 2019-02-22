@@ -3,7 +3,7 @@
         [( ${attr} )];
     [/]
     };
-    this.globalService.[(${promiseName})].subscribe(
+    [(${promiseName})]Promise.subscribe(
        (result) => [(${promiseName})]ResultHandler(result),
        (error) => console.log(error)
     );
