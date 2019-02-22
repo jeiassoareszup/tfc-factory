@@ -1,0 +1,3 @@
+    public [(${serviceName})](payload) {
+        return this.httpClient.post(`${environment.serviceBaseUri}/[(${servicePath})]`, payload);
+    }

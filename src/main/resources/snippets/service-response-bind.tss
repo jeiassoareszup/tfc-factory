@@ -1,0 +1,9 @@
+    let [(${promiseName})]ResultHandler = (result) => {
+    [# th:each="attr : ${attributionList}"]
+        [( ${attr} )];
+    [/]
+    };
+    this.globalService.[(${promiseName})].subscribe(
+       (result) => [(${promiseName})]ResultHandler(result),
+       (error) => console.log(error)
+    );

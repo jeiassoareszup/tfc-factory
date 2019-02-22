@@ -3,7 +3,16 @@ package com.example.tfc.factory.utils;
 import com.example.tfc.factory.commons.dto.TypeScriptFieldDTO;
 import com.example.tfc.factory.commons.dto.TypeScriptFunctionDTO;
 import com.example.tfc.factory.commons.dto.TypeScriptImportDTO;
-import org.springframework.util.StringUtils;
+import org.apache.commons.lang3.StringUtils;
+import org.thymeleaf.TemplateEngine;
+import org.thymeleaf.context.Context;
+import org.thymeleaf.spring5.SpringTemplateEngine;
+import org.thymeleaf.templatemode.TemplateMode;
+import org.thymeleaf.templateresolver.ClassLoaderTemplateResolver;
+
+import java.util.HashSet;
+import java.util.Locale;
+import java.util.stream.Collectors;
 
 public final class TypeScriptTemplateUtils {
 
@@ -167,7 +176,7 @@ public final class TypeScriptTemplateUtils {
     }
 
     public static String getConstructor(String... params) {
-        if (StringUtils.isEmpty(params)) {
+        if (params == null || params.length == 0) {
             return "";
         }
 
@@ -181,30 +190,56 @@ public final class TypeScriptTemplateUtils {
     }
 
     public static String getFunctionCall(String var, String functionName, boolean commented, boolean inner, String... params) {
-        StringBuilder builder = new StringBuilder();
-        if (commented) {
-            builder.append("// ");
-        }
+        StringBuilder builder = new StringBuilder("    ");
+//        if (commented) {
+//            builder.append("// ");
+//        }
 
         String param = params == null || params.length == 0 ? "" : String.join(", ", params);
 
         if (!StringUtils.isEmpty(var)) {
 
-            builder.append("this.");
+            builder.append("let ");
             builder.append(var);
             builder.append(" = ");
         }
 
-        if(inner){
+        if (inner) {
             builder.append("this.");
         }
 
         builder.append(functionName);
         builder.append("(");
-        builder.append(param);
+        if(StringUtils.contains(functionName, "globalService")) {
+            builder.append("JSON.parse('{").append(StringUtils.replace(param, "'", "\"")).append("}')");
+        } else {
+            builder.append(param);
+        }
+
         builder.append(");\n");
 
         return builder.toString();
+    }
+
+    public static String getFunctionResult(String promise, HashSet<String> results) {
+
+        Context ctx = new Context(Locale.US);
+        ctx.setVariable("promiseName", promise);
+        ctx.setVariable("attributionList",
+                results.stream()
+                        .map(s -> {
+                            if (StringUtils.contains(s, "*")) {
+                                return StringUtils.split(s, "*");
+                            } else {
+                                return new String[]{s, s};
+                            }
+                        })
+                        .map(sT -> "this." + sT[0] + " = result." + sT[1])
+                        .collect(Collectors.toList())
+        );
+
+        return ThymeleafUtils.tsTemplateEngine().process("service-response-bind", ctx);
+
     }
 
     public static String getNgModule(String[] declarations, String[] imports, String[] providers, String[] bootstrap) {
@@ -219,4 +254,6 @@ public final class TypeScriptTemplateUtils {
 
         return String.format(builder.toString(), String.join(", ", declarations), String.join(", ", imports), String.join(", ", providers), String.join(", ", bootstrap));
     }
+
+
 }
