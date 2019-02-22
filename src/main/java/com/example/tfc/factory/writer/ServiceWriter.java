@@ -4,14 +4,19 @@ import com.example.tfc.factory.commons.Constants;
 import com.example.tfc.factory.commons.dto.PanelDTO;
 import com.example.tfc.factory.commons.dto.TypeScriptFunctionDTO;
 import com.example.tfc.factory.commons.dto.TypeScriptImportDTO;
+import com.example.tfc.factory.utils.ThymeleafUtils;
 import com.example.tfc.factory.utils.TypeScriptTemplateUtils;
+import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Component;
+import org.thymeleaf.context.Context;
 
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.util.Locale;
+import java.util.stream.Collectors;
 
 @Component
 @Qualifier("serviceWriter")
@@ -38,10 +43,23 @@ public class ServiceWriter implements Writer {
             body.append("\n");
 
             panelDTO.getService().getDescriptions().forEach(d -> {
+
                 String name = getServiceFunctionName(d.getName());
-                String[] param = new String[] {"queryString"};
-                String rtrn = "this.httpClient." + d.getMethod() + "(`" + d.getUrl() + "${queryString}`)";
-                body.append(TypeScriptTemplateUtils.getFunction(new TypeScriptFunctionDTO("public", name, param, "", rtrn)));
+
+                Context ctx = new Context(Locale.US);
+                ctx.setVariable("serviceName", name);
+                ctx.setVariable("serviceUri", d.getUrl());
+
+                body.append(ThymeleafUtils.tsTemplateEngine().process("http-get-call", ctx));
+
+            });
+
+            panelDTO.getComponent().getServiceCalls().forEach(call -> {
+                Context ctx = new Context(Locale.US);
+                ctx.setVariable("serviceName", call.getFunctionName());
+                ctx.setVariable("servicePath", call.getPath());
+
+                body.append(ThymeleafUtils.tsTemplateEngine().process(call.getTemplate(), ctx));
             });
 
             builder.append(TypeScriptTemplateUtils.getClassDeclaration( Constants.GLOBAL_SERVICE_NAME, body.toString(), false));
@@ -61,6 +79,8 @@ public class ServiceWriter implements Writer {
         panelDTO.getService().getImports().add(new TypeScriptImportDTO(injectable, "@angular/core"));
         String[] httpClient = {"HttpClient"};
         panelDTO.getService().getImports().add(new TypeScriptImportDTO(httpClient, "@angular/common/http"));
+        String[] environment = {"environment"};
+        panelDTO.getService().getImports().add(new TypeScriptImportDTO(environment, "../../environments/environment"));
     }
 }
 

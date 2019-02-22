@@ -1,0 +1,9 @@
+    let [(${promiseName})]ResultHandler = (result) => {
+    [# th:each="attr : ${attributionList}"]
+        [( ${attr} )];
+    [/]
+    };
+    [(${promiseName})]Promise.subscribe(
+       (result) => [(${promiseName})]ResultHandler(result),
+       (error) => console.log(error)
+    );

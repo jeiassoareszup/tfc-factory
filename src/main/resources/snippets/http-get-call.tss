@@ -1,0 +1,3 @@
+    public [(${serviceName})](queryString) {
+        return this.httpClient.get(`[(${serviceUri})]${queryString}`);
+    }
