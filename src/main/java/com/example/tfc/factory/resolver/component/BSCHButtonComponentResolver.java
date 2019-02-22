@@ -21,6 +21,11 @@ public class BSCHButtonComponentResolver extends ComponentResolver {
         htmlElementDTO.setType(HTMLElementType.BUTTON);
         htmlElementDTO.setText(ReflectionUtils.getFieldValue(component, "getText"));
         String name = ReflectionUtils.getFieldValue(component, "getName");
+
+        String[] dimensions = StringUtils.split(ReflectionUtils.getFieldValue(component, "getDimensions"), ",");
+
+        htmlElementDTO.addAttribute("style", "position: absolute; left: "+dimensions[0] + "px; top: " + dimensions[1] + "px; width: " + dimensions[2] + "px; height: " + dimensions[3] + "px;");
+
         String clickFunctionName = getClickProcessFunctionName(name);
 
         if (!StringUtils.isEmpty(name)) {
