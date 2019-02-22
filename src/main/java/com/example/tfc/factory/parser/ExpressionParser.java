@@ -66,13 +66,16 @@ public abstract class ExpressionParser {
     String decorateValue(String value) {
 
         if ("ALPHANUMERIC".equals(getParameterType()) && "VALUE".equals(getOutput())) {
-
             if ("NULL".equals(value)) {
                 return value.toLowerCase();
             }
-
             return "\"" + value + "\"";
+        } else if ("CONTEXT".equals(getParameter())) {
+            return "this." + getOutput();
+        } else if ("FALSE".equals(value) || "TRUE".equals(value)) {
+            return value.toLowerCase();
         }
+
         return value;
     }
 }

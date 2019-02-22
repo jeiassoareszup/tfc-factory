@@ -14,6 +14,8 @@ public final class ResolverManager {
         resolvers.put("com.ibm.dse.gui.extensions.BSCHTextField", new BSCHTextFieldComponentResolver());
         resolvers.put("com.ibm.dse.gui.extensions.BSCHButton", new BSCHButtonComponentResolver());
         resolvers.put("com.ibm.dse.gui.extensions.BSCHTable", new BSCHTableComponentResolver());
+        resolvers.put("com.ibm.dse.gui.extensions.BSCHComboBox", new BSCHComboBoxResolver());
+        resolvers.put("com.ibm.dse.gui.extensions.BSCHCheckBox", new BSCHCheckBoxResolver());
         resolvers.put("com.ibm.dse.gui.extensions.BSCHCrossRelation", new BSCHCrossRelationComponentResolver());
         resolvers.put("NOT_FOUND", new NotFoundComponentResolver());
     }

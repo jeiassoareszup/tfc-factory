@@ -12,6 +12,7 @@ public class ConditionExpressionParser extends ExpressionParser {
     static {
         operators.put("EQ", "===");
         operators.put("NE", "!==");
+        operators.put("GT", ">");
     }
 
     public ConditionExpressionParser(String expression) {
@@ -23,7 +24,7 @@ public class ConditionExpressionParser extends ExpressionParser {
 
         StringBuilder builder = new StringBuilder();
 
-        if ("ISCLICKED".equals(getAction())) {
+        if ("ISCLICKED".equals(getAction()) || "LAST_PROCESS_STATUS".equals(getAction()) || "PARENTWINDOW".equals(getAction())) {
             return "";
         }
 

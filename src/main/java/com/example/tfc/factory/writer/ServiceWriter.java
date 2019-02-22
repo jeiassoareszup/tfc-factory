@@ -2,11 +2,9 @@ package com.example.tfc.factory.writer;
 
 import com.example.tfc.factory.commons.Constants;
 import com.example.tfc.factory.commons.dto.PanelDTO;
-import com.example.tfc.factory.commons.dto.TypeScriptFunctionDTO;
 import com.example.tfc.factory.commons.dto.TypeScriptImportDTO;
 import com.example.tfc.factory.utils.ThymeleafUtils;
 import com.example.tfc.factory.utils.TypeScriptTemplateUtils;
-import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Component;
 import org.thymeleaf.context.Context;
@@ -16,7 +14,6 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.Locale;
-import java.util.stream.Collectors;
 
 @Component
 @Qualifier("serviceWriter")
@@ -24,7 +21,7 @@ public class ServiceWriter implements Writer {
 
     @Override
     public void write(PanelDTO panelDTO) {
-        Path path = Paths.get( Constants.FULL_SERVICE_FOLDER_PATH + Constants.GLOBAL_SERVICE_FILE_NAME);
+        Path path = Paths.get(Constants.FULL_SERVICE_FOLDER_PATH + Constants.GLOBAL_SERVICE_FILE_NAME);
 
         try {
 
@@ -62,7 +59,7 @@ public class ServiceWriter implements Writer {
                 body.append(ThymeleafUtils.tsTemplateEngine().process(call.getTemplate(), ctx));
             });
 
-            builder.append(TypeScriptTemplateUtils.getClassDeclaration( Constants.GLOBAL_SERVICE_NAME, body.toString(), false));
+            builder.append(TypeScriptTemplateUtils.getClassDeclaration(Constants.GLOBAL_SERVICE_NAME, body.toString(), false));
             Files.write(path, builder.toString().getBytes());
         } catch (IOException e) {
             e.printStackTrace();
@@ -70,7 +67,7 @@ public class ServiceWriter implements Writer {
 
     }
 
-    public static String getServiceFunctionName(String serviceName){
+    public static String getServiceFunctionName(String serviceName) {
         return "service" + serviceName;
     }
 
