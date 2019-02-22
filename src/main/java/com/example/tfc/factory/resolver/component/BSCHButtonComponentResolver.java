@@ -1,25 +1,21 @@
 package com.example.tfc.factory.resolver.component;
 
 import com.example.tfc.factory.commons.Constants;
-import com.example.tfc.factory.commons.dto.HTMLElementDTO;
-import com.example.tfc.factory.commons.dto.PanelDTO;
-import com.example.tfc.factory.commons.dto.ServiceDescriptionDTO;
-import com.example.tfc.factory.commons.dto.TypeScriptFunctionDTO;
+import com.example.tfc.factory.commons.dto.*;
 import com.example.tfc.factory.commons.enums.HTMLElementType;
 import com.example.tfc.factory.utils.ReflectionUtils;
 import com.example.tfc.factory.utils.TypeScriptTemplateUtils;
 import com.example.tfc.factory.writer.ServiceWriter;
-import org.springframework.util.StringUtils;
+import org.apache.commons.lang3.StringUtils;
 
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Optional;
+import java.util.*;
+import java.util.function.Function;
+import java.util.stream.Collectors;
 
 public class BSCHButtonComponentResolver extends ComponentResolver {
 
     @Override
     public PanelDTO resolve(Object component, PanelDTO panelDTO) {
-
 
         HTMLElementDTO htmlElementDTO = new HTMLElementDTO();
         htmlElementDTO.setType(HTMLElementType.BUTTON);
@@ -64,7 +60,7 @@ public class BSCHButtonComponentResolver extends ComponentResolver {
                 createRelationCallFunction(clickProcess.get(i), clickBody);
             } else {
                 String data = ReflectionUtils.getFieldValue(clickProcess.get(i), "getData");
-                if(!StringUtils.isEmpty(data)) {
+                if (!StringUtils.isEmpty(data)) {
                     panelDTO.getComponent().checkDeclaration(data.split(",")[0], "null");
                 }
 
@@ -110,7 +106,7 @@ public class BSCHButtonComponentResolver extends ComponentResolver {
 
     private void createRelationCallFunction(Object process, StringBuilder body) {
         String data = ReflectionUtils.getFieldValue(process, "getData");
-        String[] relations = data.split(",");
+        String[] relations = StringUtils.split(data, ",");
 
         for (String relation : relations) {
             body.append(TypeScriptTemplateUtils.getFunctionCall(null, BSCHCrossRelationComponentResolver.getFunctionName(relation), false, true));
@@ -123,7 +119,6 @@ public class BSCHButtonComponentResolver extends ComponentResolver {
         String outData = ReflectionUtils.getFieldValue(process, "getOutData");
 
         String[] processData = data.split(",");
-
 
         Optional<ServiceDescriptionDTO> serviceDescription = panelDTO.getService().getDescriptions().stream().filter(d -> d.getName().equals(processData[0])).findFirst();
 
@@ -155,15 +150,27 @@ public class BSCHButtonComponentResolver extends ComponentResolver {
             params = paramList.toArray(new String[paramList.size()]);
         }
 
-        String returnVariable = StringUtils.isEmpty(outData) ? null : getReturnVariable(outData);
+        Optional<HashSet<String>> leftSideVariables = getReturningVariables(outData, this::getLeftSideVariable);
 
-        if (!StringUtils.isEmpty(returnVariable)) {
-            panelDTO.getComponent().checkDeclaration(returnVariable, "null");
+        if (leftSideVariables.isPresent()) {
+            panelDTO.getComponent().checkDeclaration(leftSideVariables.get(), "null");
         }
 
-        body.append(TypeScriptTemplateUtils.getFunctionCall(returnVariable,
-                Character.toLowerCase(Constants.GLOBAL_SERVICE_NAME.charAt(0)) + Constants.GLOBAL_SERVICE_NAME.substring(1) + "." + ServiceWriter.getServiceFunctionName(processData[0]),
+        String functionName = ServiceWriter.getServiceFunctionName(processData[0]);
+
+        body.append(TypeScriptTemplateUtils.getFunctionCall(functionName + Constants.VAR_PROMISE_SUFFIX,
+                Character.toLowerCase(Constants.GLOBAL_SERVICE_NAME.charAt(0)) + Constants.GLOBAL_SERVICE_NAME.substring(1) + "." + functionName,
                 !serviceDescription.isPresent(), true, params));
+
+        Optional<HashSet<String>> returningAttribution = getReturningVariables(outData, null);
+        if(returningAttribution.isPresent()) {
+            body.append(TypeScriptTemplateUtils.getFunctionResult(functionName, returningAttribution.get()));
+        }
+
+        // Include non-mapped http request calls
+        if(!serviceDescription.isPresent()) {
+            panelDTO.getComponent().getServiceCalls().add(new TypeScriptHttpRequestCallDTO(functionName, processData[0], "POST"));
+        }
 
     }
 
@@ -172,7 +179,7 @@ public class BSCHButtonComponentResolver extends ComponentResolver {
         if (!StringUtils.isEmpty(expression) && expression.contains("*")) {
             String[] split = expression.split("\\*");
 
-            if(split[1].startsWith("'") || split[1].startsWith("\"")){
+            if (split[1].startsWith("'") || split[1].startsWith("\"")) {
                 return split[1];
             }
 
@@ -182,17 +189,22 @@ public class BSCHButtonComponentResolver extends ComponentResolver {
         return "''";
     }
 
-    private String getReturnVariable(String expression) {
-        String[] first = expression.split(",");
-
-        if(first.length < 2){
-            return first[0].split("\\*")[0];
+    private Optional<HashSet<String>> getReturningVariables(String expression, Function<String, String> variableExtractor) {
+        String[] expressionTokenized = StringUtils.split(expression, ",");
+        if (expressionTokenized != null && expressionTokenized.length > 0) {
+            return Optional.of(
+                    (HashSet<String>) Arrays.stream(expressionTokenized)
+                            .map(s -> variableExtractor != null ? variableExtractor.apply(s) : s)
+                            .collect(Collectors.toSet()));
         }
-
-        if (!StringUtils.isEmpty(first[1]) && first[1].contains("*")) {
-            return first[1].split("\\*")[0];
-        }
-
-        return "";
+        return Optional.empty();
     }
+
+    private String getLeftSideVariable(String expression) {
+        if (!StringUtils.isEmpty(expression) && expression.contains("*")) {
+            return expression.split("\\*")[0];
+        }
+        return expression;
+    }
+
 }
