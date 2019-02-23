@@ -24,4 +24,13 @@ public enum ComboBoxList {
     public String getValue() {
         return value;
     }
+
+    public static ComboBoxList find(String name) {
+
+        for (ComboBoxList c : ComboBoxList.values()) {
+            if (c.name().equals(name)) return c;
+        }
+
+        return null;
+    }
 }

@@ -31,7 +31,10 @@ public class BSCHComboBoxResolver extends ComponentResolver {
 
         String dataName = ReflectionUtils.getFieldValue(component, "getDataName");
 
-        panelDTO.getComponent().checkDeclaration(dataName, ComboBoxList.valueOf(values.replaceAll(Constants.REGEX_REMOVE_SPECIAL_CHARACTERS, "")).getValue());
+        ComboBoxList list = ComboBoxList.find(values.replaceAll(Constants.REGEX_REMOVE_SPECIAL_CHARACTERS, ""));
+        String comboInit =  list != null ? list.getValue() : "[]";
+
+        panelDTO.getComponent().checkDeclaration(dataName, comboInit);
 
         HTMLElementDTO div = super.getDefaultDiv();
         div.getChildren().add(htmlElementDTO);
