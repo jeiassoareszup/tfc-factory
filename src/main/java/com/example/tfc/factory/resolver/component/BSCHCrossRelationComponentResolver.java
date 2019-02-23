@@ -17,7 +17,7 @@ public class BSCHCrossRelationComponentResolver extends ComponentResolver {
 
     static {
         expressions.put("BEHAVIOUR RDONLY", Constants.DISABLED_ATTRIBUTE_NAME);
-        expressions.put("BEHAVIOUR IREQ", Constants.REQUIRED_ATTRIBUTE_NAME);
+        expressions.put("BEHAVIOUR IREQ", Constants.DISABLED_ATTRIBUTE_NAME);
         expressions.put("BEHAVIOUR OPT", Constants.DISABLED_ATTRIBUTE_NAME);
         expressions.put("BEHAVIOUR RDONLYEMPTY", Constants.DISABLED_ATTRIBUTE_NAME);
         expressions.put("VISIBLE FALSE", Constants.HIDDEN_ATTRIBUTE_NAME);

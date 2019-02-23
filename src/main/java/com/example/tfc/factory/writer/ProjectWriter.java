@@ -8,12 +8,12 @@ import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Component;
 import org.springframework.util.ResourceUtils;
 
-import java.io.File;
-import java.io.FileNotFoundException;
-import java.io.IOException;
+import java.io.*;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.util.concurrent.Executors;
+import java.util.function.Consumer;
 
 @Component
 @Qualifier("projectWriter")
@@ -21,19 +21,25 @@ public class ProjectWriter implements Writer {
 
     @Override
     public void write(PanelDTO panelDTO) {
+        runShellCommand(String.format(Constants.NEW_PROJECT_STRING_TEMPLATE, panelDTO.getName(), Constants.PROJECT_ROOT_FOLDER_NAME), Constants.TEMP_FOLDER);
+        runShellCommand("npm install front-unico-ui --save", Constants.TEMP_FOLDER + Constants.PROJECT_ROOT_FOLDER_NAME);
+        createComponentFolder(panelDTO);
+        createServiceFolder();
+    }
 
+    private void runShellCommand(String command, String directory) {
         try {
             ProcessBuilder builder = new ProcessBuilder();
-            builder.directory(new File("/tmp"));
-            builder.command(String.format(Constants.NEW_PROJECT_STRING_TEMPLATE, panelDTO.getName(), Constants.PROJECT_ROOT_FOLDER_NAME).split(" "));
+            builder.directory(new File(directory));
+            builder.command(command.split(" "));
 
             Process process = builder.start();
 
+            StreamGobbler gobbler = new StreamGobbler(process.getInputStream(), System.out::println);
+            Executors.newSingleThreadExecutor().submit(gobbler);
+
             int exitCode = process.waitFor();
             assert exitCode == 0;
-
-            createComponentFolder(panelDTO);
-            createServiceFolder();
         } catch (IOException | InterruptedException e) {
             e.printStackTrace();
         }
@@ -51,6 +57,31 @@ public class ProjectWriter implements Writer {
         moveStyle();
         createModule(panelDTO);
         createAppHtml(panelDTO);
+        addFrontUnicoStyle();
+    }
+
+    private void addFrontUnicoStyle() {
+        Path path = Paths.get(Constants.TEMP_FOLDER + Constants.PROJECT_ROOT_FOLDER_NAME + "/src/main.ts");
+
+        String body = "import { enableProdMode } from '@angular/core';\n" +
+                "import { platformBrowserDynamic } from '@angular/platform-browser-dynamic';\n" +
+                "\n" +
+                "import { AppModule } from './app/app.module';\n" +
+                "import { environment } from './environments/environment';\n" +
+                "import '../node_modules/front-unico-ui/assets/css/style.css';\n" +
+                "\n" +
+                "if (environment.production) {\n" +
+                "  enableProdMode();\n" +
+                "}\n" +
+                "\n" +
+                "platformBrowserDynamic().bootstrapModule(AppModule)\n" +
+                "  .catch(err => console.log(err));\n";
+
+        try {
+            Files.write(path, body.getBytes());
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
     }
 
     private void createAppHtml(PanelDTO panelDTO) {
@@ -196,7 +227,7 @@ public class ProjectWriter implements Writer {
             panelDTO.getService().getImports().forEach(i -> builder.append(TypeScriptTemplateUtils.getImport(i)));
             builder.append("\n");
 
-            builder.append(TypeScriptTemplateUtils.getNgModule(new String[]{"AppComponent", "" + component[0]+""}, new String[]{"BrowserModule", "HttpClientModule", "FormsModule"}, new String[]{"GlobalService"}, new String[]{"AppComponent"}));
+            builder.append(TypeScriptTemplateUtils.getNgModule(new String[]{"AppComponent", "" + component[0]+""}, new String[]{"BrowserModule", "HttpClientModule", "FormsModule", "FrontUnicoModule"}, new String[]{"GlobalService"}, new String[]{"AppComponent"}));
 
             builder.append("\n");
             builder.append(TypeScriptTemplateUtils.getClassDeclaration("AppModule", "", false));
@@ -213,6 +244,23 @@ public class ProjectWriter implements Writer {
         panelDTO.getService().getImports().add(new TypeScriptImportDTO(new String[]{"HttpClientModule"}, "@angular/common/http"));
         panelDTO.getService().getImports().add(new TypeScriptImportDTO(new String[]{"FormsModule"}, "@angular/forms"));
         panelDTO.getService().getImports().add(new TypeScriptImportDTO(new String[]{"AppComponent"}, "./app.component"));
+        panelDTO.getService().getImports().add(new TypeScriptImportDTO(new String[]{"FrontUnicoModule"}, "front-unico-ui"));
         panelDTO.getService().getImports().add(new TypeScriptImportDTO(new String[]{"GlobalService"}, "./service/api.service"));
+    }
+
+    private static class StreamGobbler implements Runnable{
+
+        private final InputStream inputStream;
+        private final Consumer<String> consumer;
+
+        StreamGobbler(InputStream inputStream, Consumer<String> consumer) {
+            this.inputStream = inputStream;
+            this.consumer = consumer;
+        }
+
+        @Override
+        public void run() {
+            new BufferedReader(new InputStreamReader(inputStream)).lines().forEach(consumer);
+        }
     }
 }

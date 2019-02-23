@@ -13,27 +13,36 @@ public class BSCHTextFieldComponentResolver extends ComponentResolver {
 
         HTMLElementDTO htmlElementDTO = new HTMLElementDTO();
         htmlElementDTO.setType(HTMLElementType.INPUT);
-        htmlElementDTO.setText(ReflectionUtils.getFieldValue(component, "getText"));
 
         String[] dimensions = StringUtils.split(ReflectionUtils.getFieldValue(component, "getDimensions"), ",");
 
-        htmlElementDTO.addAttribute("style", "position: absolute; left: "+dimensions[0] + "px; top: " + dimensions[1] + "px; width: " + dimensions[2] + "px; height: " + dimensions[3] + "px;");
+        htmlElementDTO.addAttribute("style", "position: absolute; left: "+dimensions[0] + "px; top: " + dimensions[1] + "px; width: " + dimensions[2] + "px; height: " + dimensions[3] + "px; text-align: left;");
+
+        htmlElementDTO.addAttribute("class", "my-style");
 
         String variable = ReflectionUtils.getFieldValue(component, "getDataName");
+        String defaultValue = ReflectionUtils.getFieldValue(component, "getDefaultValue");
+        if (!StringUtils.isEmpty(defaultValue)) {
+            panelDTO.getComponent().checkDeclaration(variable, "'" + defaultValue + "'");
+        }
+
         setModelVariable(panelDTO, variable);
 
-        panelDTO.getHtml().getElements().add(
-                htmlElementDTO
-                        .addAttribute("name", ReflectionUtils.getFieldValue(component, "getName"))
-                        .addAttribute("[(ngModel)]", variable)
-                        .addAttribute("type", "text")
-                        .addAttribute("maxlength", ReflectionUtils.getFieldValue(component, "getMaxChars"))
-        );
+        htmlElementDTO
+                .addAttribute("name", ReflectionUtils.getFieldValue(component, "getName"))
+                .addAttribute("[(ngModel)]", variable)
+                .addAttribute("maxlength", ReflectionUtils.getFieldValue(component, "getMaxChars"))
+                .addAttribute("[label]", BSCHLabelComponentResolver.getLabelVariableName(ReflectionUtils.getFieldValue(component, "getName")));
+
+        HTMLElementDTO div = super.getDefaultDiv();
+        div.getChildren().add(htmlElementDTO);
+
+        panelDTO.getHtml().getElements().add(div);
 
         return panelDTO;
     }
 
-    private void setModelVariable(PanelDTO panelDTO, String name){
+    private void setModelVariable(PanelDTO panelDTO, String name) {
         panelDTO.getComponent().checkDeclaration(name, "''");
     }
 }

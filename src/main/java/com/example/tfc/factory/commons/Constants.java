@@ -3,7 +3,7 @@ package com.example.tfc.factory.commons;
 public final class Constants {
 
     public static final String PROJECT_ROOT_FOLDER_NAME = "/tfc-factory";
-    public static final String NEW_PROJECT_STRING_TEMPLATE = "ng new %s --directory %s --interactive false";
+    public static final String NEW_PROJECT_STRING_TEMPLATE = "ng new %s --directory %s";
     public static final String EXTERNAL_JARS_FOLDER_PATH = "/home/ricardorames/classes/";
     public static final String READ_ONLY_ATTRIBUTE_NAME = "[readonly]";
     public static final String HIDDEN_ATTRIBUTE_NAME = "[hidden]";

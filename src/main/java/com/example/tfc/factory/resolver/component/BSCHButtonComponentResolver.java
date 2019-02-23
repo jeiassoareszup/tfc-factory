@@ -17,6 +17,7 @@ public class BSCHButtonComponentResolver extends ComponentResolver {
     @Override
     public PanelDTO resolve(Object component, PanelDTO panelDTO) {
 
+
         HTMLElementDTO htmlElementDTO = new HTMLElementDTO();
         htmlElementDTO.setType(HTMLElementType.BUTTON);
         htmlElementDTO.setText(ReflectionUtils.getFieldValue(component, "getText"));
@@ -24,20 +25,22 @@ public class BSCHButtonComponentResolver extends ComponentResolver {
 
         String[] dimensions = StringUtils.split(ReflectionUtils.getFieldValue(component, "getDimensions"), ",");
 
-        htmlElementDTO.addAttribute("style", "position: absolute; left: "+dimensions[0] + "px; top: " + dimensions[1] + "px; width: " + dimensions[2] + "px; height: " + dimensions[3] + "px;");
-
         String clickFunctionName = getClickProcessFunctionName(name);
 
         if (!StringUtils.isEmpty(name)) {
             htmlElementDTO.addAttribute("(click)", clickFunctionName + "()");
-            htmlElementDTO.addAttribute("type", "submit");
-            htmlElementDTO.addAttribute("class", "bg-black");
         }
 
-        panelDTO.getHtml().getElements().add(
-                htmlElementDTO
-                        .addAttribute("name", name)
-        );
+        htmlElementDTO.addAttribute("type", "submit");
+        htmlElementDTO.addAttribute("style", "background-color: #424455; border-radius: 100px; position: absolute; left: "+dimensions[0] + "px; top: " + dimensions[1] + "px; width: " + dimensions[2] + "px; height: " + dimensions[3] + "px;");
+        htmlElementDTO.addAttribute("class", "my-style");
+
+        htmlElementDTO.addAttribute("name", name);
+
+        HTMLElementDTO div = getDefaultDiv();
+        div.getChildren().add(htmlElementDTO);
+
+        panelDTO.getHtml().getElements().add(div);
 
         buildClickFunction(component, panelDTO, clickFunctionName);
 
