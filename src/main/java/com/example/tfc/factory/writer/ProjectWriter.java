@@ -6,7 +6,6 @@ import com.example.tfc.factory.commons.dto.TypeScriptImportDTO;
 import com.example.tfc.factory.utils.TypeScriptTemplateUtils;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Component;
-import org.springframework.util.ResourceUtils;
 
 import java.io.*;
 import java.nio.file.Files;

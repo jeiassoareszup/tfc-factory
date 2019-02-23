@@ -17,7 +17,6 @@ public class BSCHButtonComponentResolver extends ComponentResolver {
     @Override
     public PanelDTO resolve(Object component, PanelDTO panelDTO) {
 
-
         HTMLElementDTO htmlElementDTO = new HTMLElementDTO();
         htmlElementDTO.setType(HTMLElementType.BUTTON);
         htmlElementDTO.setText(ReflectionUtils.getFieldValue(component, "getText"));
@@ -121,63 +120,69 @@ public class BSCHButtonComponentResolver extends ComponentResolver {
 
     public void createServiceCallFunction(PanelDTO panelDTO, Object process, StringBuilder body) {
 
+        List calls = new ArrayList<String>();
+
         String data = ReflectionUtils.getFieldValue(process, "getData");
         String outData = ReflectionUtils.getFieldValue(process, "getOutData");
-
         String[] processData = data.split(",");
-
-        Optional<ServiceDescriptionDTO> serviceDescription = panelDTO.getService().getDescriptions().stream().filter(d -> d.getName().equals(processData[0])).findFirst();
-
-        String[] params;
-
-        if (serviceDescription.isPresent() && "get".equals(serviceDescription.get().getMethod()) && processData.length > 1) {
-            StringBuilder query = new StringBuilder();
-            query.append("`?");
-            for (int i = 1; i < processData.length; i++) {
-                if (processData[i].contains("*")) {
-                    String[] split = processData[i].split("\\*");
-                    query.append(split[0]);
-                    query.append("=${");
-                    query.append(getParamVariable(processData[i]));
-                    query.append("}");
-
-                    if (i + 1 < processData.length) {
-                        query.append("&");
-                    }
-                }
-            }
-            query.append("`");
-            params = new String[]{query.toString()};
-        } else {
-            ArrayList<String> paramList = new ArrayList<>();
-            for (String processDatum : processData) {
-                paramList.add(getParamVariable(processDatum));
-            }
-            params = paramList.toArray(new String[paramList.size()]);
-        }
-
-        Optional<HashSet<String>> leftSideVariables = getReturningVariables(outData, this::getLeftSideVariable);
-
-        if (leftSideVariables.isPresent()) {
-            panelDTO.getComponent().checkDeclaration(leftSideVariables.get(), "null");
-        }
 
         String functionName = ServiceWriter.getServiceFunctionName(processData[0]);
 
-        body.append(TypeScriptTemplateUtils.getFunctionCall(functionName + Constants.VAR_PROMISE_SUFFIX,
-                Character.toLowerCase(Constants.GLOBAL_SERVICE_NAME.charAt(0)) + Constants.GLOBAL_SERVICE_NAME.substring(1) + "." + functionName,
-                !serviceDescription.isPresent(), true, params));
+        if (calls.contains(functionName)) {
 
-        Optional<HashSet<String>> returningAttribution = getReturningVariables(outData, null);
-        if(returningAttribution.isPresent()) {
-            body.append(TypeScriptTemplateUtils.getFunctionResult(functionName, returningAttribution.get()));
+            Optional<ServiceDescriptionDTO> serviceDescription = panelDTO.getService().getDescriptions().stream().filter(d -> d.getName().equals(processData[0])).findFirst();
+
+            String[] params;
+
+            if (serviceDescription.isPresent() && "get".equals(serviceDescription.get().getMethod()) && processData.length > 1) {
+                StringBuilder query = new StringBuilder();
+                query.append("`?");
+                for (int i = 1; i < processData.length; i++) {
+                    if (processData[i].contains("*")) {
+                        String[] split = processData[i].split("\\*");
+                        query.append(split[0]);
+                        query.append("=${");
+                        query.append(getParamVariable(processData[i]));
+                        query.append("}");
+
+                        if (i + 1 < processData.length) {
+                            query.append("&");
+                        }
+                    }
+                }
+                query.append("`");
+                params = new String[]{query.toString()};
+            } else {
+                ArrayList<String> paramList = new ArrayList<>();
+                for (String processDatum : processData) {
+                    paramList.add(getParamVariable(processDatum));
+                }
+                params = paramList.toArray(new String[paramList.size()]);
+            }
+
+            Optional<HashSet<String>> leftSideVariables = getReturningVariables(outData, this::getLeftSideVariable);
+
+            if (leftSideVariables.isPresent()) {
+                panelDTO.getComponent().checkDeclaration(leftSideVariables.get(), "null");
+            }
+
+
+            body.append(TypeScriptTemplateUtils.getFunctionCall(functionName + Constants.VAR_PROMISE_SUFFIX,
+                    Character.toLowerCase(Constants.GLOBAL_SERVICE_NAME.charAt(0)) + Constants.GLOBAL_SERVICE_NAME.substring(1) + "." + functionName,
+                    !serviceDescription.isPresent(), true, params));
+
+            Optional<HashSet<String>> returningAttribution = getReturningVariables(outData, null);
+            if (returningAttribution.isPresent()) {
+                body.append(TypeScriptTemplateUtils.getFunctionResult(functionName, returningAttribution.get()));
+            }
+
+            // Include non-mapped http request calls
+            if (!serviceDescription.isPresent()) {
+                panelDTO.getComponent().getServiceCalls().add(new TypeScriptHttpRequestCallDTO(functionName, processData[0], "POST"));
+            }
+
+            calls.add(functionName);
         }
-
-        // Include non-mapped http request calls
-        if(!serviceDescription.isPresent()) {
-            panelDTO.getComponent().getServiceCalls().add(new TypeScriptHttpRequestCallDTO(functionName, processData[0], "POST"));
-        }
-
     }
 
     private String getParamVariable(String expression) {
